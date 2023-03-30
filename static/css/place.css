@@ -135,7 +135,7 @@ input[type=number] {
 
     border-style: solid;
     border-width: 2px;
-    border-radius: 25px;
+    border-radius: 0;
 
     margin: auto;
 }
