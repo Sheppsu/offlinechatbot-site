@@ -87,7 +87,7 @@ class WebsocketWrapper:
         return getattr(self.ws, item)
 
     async def send(self, msg):
-        if type(msg) == str and len(msg) < 1000:
+        if type(msg) == str and msg != "PONG" and len(msg) < 1000:
             _log.info(f"Replying to {self.ws.id}: {msg}")
         await self.ws.send(msg)
 
@@ -186,6 +186,7 @@ class Server:
             "AUTH": self.handle_authentication,
             "CLEAR": self.handle_clear,
             "BAN": self.handle_ban,
+            "PING": self.handle_ping,
         }
 
     async def send_canvas_info(self, ws):
@@ -199,9 +200,9 @@ class Server:
         # not so sure about the thread-safety of calling _get_user
         self.user_lock.acquire()
         user = _get_user(token)
+        self.user_lock.release()
         if user is None:
             return "AUTHENTICATION FAILED"
-        self.user_lock.release()
         return user
 
     async def send_all(self, message, exclude=None):
@@ -297,6 +298,9 @@ class Server:
         await self.loop.run_in_executor(self.executor, user.save)
         for ws in self.get_same_users(user.id):
             await ws.send("BANNED")
+
+    async def handle_ping(self, ws, args):
+        await ws.send("PONG")
 
     # Event functionality
 

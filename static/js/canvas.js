@@ -312,10 +312,18 @@ function popupError(message, timer = null) {
     }
 }
 
+function pingServer() {
+    if (ws !== null) {
+        ws.send("PING");
+        setTimeout(pingServer, 1000*60*5);
+    }
+}
+
 function onOpen(event, authdata) {
     if (authdata.token) {
         ws.send("AUTH "+authdata.token);
     }
+    pingServer();
 }
 
 function onMessage(event) {
