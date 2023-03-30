@@ -292,8 +292,6 @@ class Server:
 
     async def handler(self, ws):
         print(ws, ws.path)
-        if ws.path.lower != "/place/ws":
-            return
         self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
         print(f"Opened connection with {ws.id}")
         await self.send_canvas_info(ws)
