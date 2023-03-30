@@ -124,11 +124,11 @@ class Canvas:
             p["user"],
             p["color"],
         ), query), key=lambda item: item[0])
-        self.canvas_cache = bytearray(125000)
+        self.canvas_cache = bytearray(250000)
         users = ["" for _ in range(250000)]  # TODO: look into using numpy
         for item in canvas_info:
             users[item[0]] = item[1]
-            self.canvas_cache[item[0] // 2] += item[2] if item[0] % 2 == 1 else item[2] << 4
+            self.canvas_cache[item[0]] = item[2]
         self.user_cache = " ".join(users)
         _log.info("Cache updated!")
 

@@ -1,12 +1,19 @@
 // constants
 
-const colors = [[255, 255, 255], [0, 0, 0], [255, 0, 0], [255, 91, 0], [255, 182, 0],
-    [237, 255, 0], [146, 255, 0], [55, 255, 0], [0, 255, 36], [0, 255, 127],
-    [0, 255, 218], [0, 201, 255], [0, 110, 255], [0, 19, 255], [72, 0, 255],
-    [163, 0, 255]];
-const hexColors = ['#ffffff', '#000000', '#ff0000', '#ff5b00', '#ffb600', '#edff00',
-    '#92ff00', '#37ff00', '#00ff24', '#00ff7f', '#00ffda', '#00c9ff', '#006eff',
-    '#0013ff', '#4800ff', '#a300ff'];
+const colors = [[255, 255, 255], [204, 204, 204], [153, 153, 153], [102, 102, 102],
+    [51, 51, 51], [0, 0, 0], [255, 0, 0], [255, 51, 0], [255, 102, 0],
+    [255, 153, 0], [255, 204, 0], [255, 255, 0], [204, 255, 0], [153, 255, 0],
+    [102, 255, 0], [51, 255, 0], [0, 255, 0], [0, 255, 51], [0, 255, 102],
+    [0, 255, 153], [0, 255, 204], [0, 255, 255], [0, 204, 255], [0, 153, 255],
+    [0, 102, 255], [0, 51, 255], [0, 0, 255], [51, 0, 255], [102, 0, 255],
+    [153, 0, 255], [204, 0, 255], [255, 0, 255], [255, 0, 204], [255, 0, 153],
+    [255, 0, 102], [255, 0, 51]];
+const hexColors = ['#ffffff', '#cccccc', '#999999', '#666666', '#333333', '#000000',
+    '#ff0000', '#ff3300', '#ff6600', '#ff9900', '#ffcc00', '#ffff00', '#ccff00',
+    '#99ff00', '#66ff00', '#33ff00', '#00ff00', '#00ff33', '#00ff66', '#00ff99',
+    '#00ffcc', '#00ffff', '#00ccff', '#0099ff', '#0066ff', '#0033ff', '#0000ff',
+    '#3300ff', '#6600ff', '#9900ff', '#cc00ff', '#ff00ff', '#ff00cc', '#ff0099',
+    '#ff0066', '#ff0033'];
 
 // elements
 
@@ -53,20 +60,14 @@ var onCooldown = false;
 
 function loadCanvas(data) {
     const view = new Uint8Array(data);
-    const pixels = new Uint8ClampedArray(view.length*8);
+    const pixels = new Uint8ClampedArray(view.length*4);
     for (var i=0; i<view.length; i++) {
-        const b = view[i];
-        const c1 = colors[b >> 4];
-        const c2 = colors[b & 15];
-        const index = i*8;
-        pixels[index] = c1[0];
-        pixels[index+1] = c1[1];
-        pixels[index+2] = c1[2];
+        const color = colors[view[i]];
+        const index = i*4;
+        pixels[index] = color[0];
+        pixels[index+1] = color[1];
+        pixels[index+2] = color[2];
         pixels[index+3] = 255;
-        pixels[index+4] = c2[0];
-        pixels[index+5] = c2[1];
-        pixels[index+6] = c2[2];
-        pixels[index+7] = 255;
     }
     const imageData = new ImageData(pixels, 500, 500);
     ctx.putImageData(imageData, 0, 0);
@@ -360,7 +361,7 @@ function connect() {
     fetch("/token").then(response => {
         return response.json();
     }).then(authdata => {
-        ws = new WebSocket("wss://place-ws.sheppsu.me");
+        ws = new WebSocket("ws://localhost:8727");
         ws.binaryType = "blob";
         ws.onopen = (event) => {onOpen(event, authdata);};
         ws.onmessage = onMessage;

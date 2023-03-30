@@ -122,8 +122,8 @@ input[type=number] {
 }
 
 #color-picker {
-    width: 80px;
-    height: 300px;
+    width: 160px;
+    height: 320px;
     margin: calc(50vh - 150px) 0 0 10px;
 }
 
@@ -135,6 +135,8 @@ input[type=number] {
 
     border-style: solid;
     border-width: 2px;
+    border-radius: 25px;
+
     margin: auto;
 }
 
