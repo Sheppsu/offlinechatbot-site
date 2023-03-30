@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Union, Optional
 from dotenv import load_dotenv
 from functools import partial
+import logging
 
 load_dotenv()
 os.environ["DJANGO_SETTINGS_MODULE"] = "offlinechatbot.settings"
@@ -20,6 +21,13 @@ from sesame.utils import get_user as _get_user
 
 UserModel = get_user_model()
 COOLDOWN = 300
+_log = logging.getLogger(__name__)
+_log.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s")
+ch.setFormatter(formatter)
+_log.addHandler(ch)
 
 
 class User:
@@ -78,6 +86,10 @@ class WebsocketWrapper:
     def __getattr__(self, item):
         return getattr(self.ws, item)
 
+    async def send(self, msg):
+        _log.info(f"Replying to {self.ws.id}: {msg}")
+        await self.ws.send(msg)
+
 
 USER_TYPE = Union[User, AnonymousUser]
 
@@ -99,7 +111,8 @@ class Canvas:
             "color": c,
         }
 
-    def update_cache(self):
+    def _update_cache(self):
+        _log.info("Updating cache...")
         query = self.db.placements.aggregate([{"$group": {
             "_id": "$coordinate",
             "user": {"$last": "$user"},
@@ -116,6 +129,7 @@ class Canvas:
             users[item[0]] = item[1]
             self.canvas_cache[item[0] // 2] += item[2] if item[0] % 2 == 1 else item[2] << 4
         self.user_cache = " ".join(users)
+        _log.info("Cache updated!")
 
     def reset_cache(self):
         self.canvas_cache = None
@@ -123,31 +137,39 @@ class Canvas:
 
     def get_canvas_info(self):
         self.lock.acquire()
+        _log.info("Getting canvas info...")
         if self.canvas_cache is None or self.user_cache is None:
-            self.update_cache()
+            self._update_cache()
+        _log.info("Canvas info retrieved.")
         self.lock.release()
         return self.canvas_cache, self.user_cache
 
     def place_pixel(self, user: User, x: int, y: int, c: int):
         self.lock.acquire()
+        _log.info("Inserting placement...")
         self.db.placements.insert_one(self.create_placement(user.name, x, y, c))
         self.reset_cache()
+        _log.info("Placement inserted")
         self.lock.release()
 
     def clear_canvas(self, x1: int, y1: int, x2: int, y2: int):
         self.lock.acquire()
+        _log.info("Clearing canvas...")
         timestamp = time()
         self.db.placements.insert_many(sum([
             [self.create_placement("", x, y, 0, timestamp)
              for y in range(y1, y2+1)]
             for x in range(x1, x2+1)], []))
         self.reset_cache()
+        _log.info("Canvas cleared.")
         self.lock.release()
 
     def clear_user(self, user):
         self.lock.acquire()
+        _log.info("Clearing user placements...")
         self.db.placements.delete_many({"user": user})
         self.reset_cache()
+        _log.info("User placements cleared.")
         self.lock.release()
 
 
@@ -278,7 +300,7 @@ class Server:
     # Event functionality
 
     async def handle_command(self, ws, command):
-        print(f"{ws.id}: {command}")
+        _log.info(f"{ws.id}: {command}")
         command = command.split()
         if len(command) < 1:
             return await ws.send("INVALID")
@@ -292,20 +314,20 @@ class Server:
 
     async def handler(self, ws):
         self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
-        print(f"Opened connection with {ws.id}")
+        _log.info(f"Opened connection with {ws.id}")
         await self.send_canvas_info(ws)
         try:
             while True:
                 command = await ws.recv()
                 await self.handle_command(ws, command)
         except websockets.ConnectionClosed:
-            print(f"Closed connection with {ws.id}")
+            _log.info(f"Closed connection with {ws.id}")
         finally:
             del self.connections[ws.id]
 
     async def run(self):
         async with websockets.serve(self.handler, os.getenv("HOST"), os.getenv("PORT")):
-            print("Server up!")
+            _log.info("Server up!")
             await asyncio.Future()  # run forever
 
 

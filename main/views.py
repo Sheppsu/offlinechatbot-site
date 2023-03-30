@@ -1,11 +1,12 @@
 from django.shortcuts import redirect
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseBadRequest
 from django.contrib.auth import get_user_model, login as _login, logout as _logout
 
 from sesame.utils import get_token as _get_token
 from common.util import render
 from common.constants import AUTH_BACKEND
 import traceback
+import requests
 
 
 User = get_user_model()
@@ -23,6 +24,9 @@ def login(req):
             _login(req, user, backend=AUTH_BACKEND)
         state = req.GET.get("state", None)
         return redirect(state or "index", permanent=True)
+    except requests.HTTPError as exc:
+        print(exc)
+        return HttpResponseBadRequest()
     except:
         traceback.print_exc()
     return HttpResponseServerError()
