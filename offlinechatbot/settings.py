@@ -62,10 +62,6 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
-WHITENOISE_MIMETYPES = {
-    '.css': "text/css",
-}
-
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "sesame.backends.ModelBackend",
@@ -148,7 +144,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static")
+    'static'
 ]
 
 # Default primary key field type
