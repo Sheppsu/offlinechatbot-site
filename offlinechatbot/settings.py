@@ -33,7 +33,6 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "open-brass-production.up.railway.app",
     "bot.sheppsu.me",
 ]
 
@@ -49,6 +48,7 @@ INSTALLED_APPS = [
 
     "place.apps.PlaceConfig",
     "main.apps.MainConfig",
+    "docs.apps.DocsConfig",
 ]
 
 MIDDLEWARE = [
