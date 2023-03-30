@@ -168,11 +168,10 @@ function startPlaceTimer(time, first = true) {
 
 // canvas moving
 
-const translateRegex = /translate\(([+-]?([0-9]*[.])?[0-9]+)px, ([+-]?([0-9]*[.])?[0-9]+)px\)/;
-
 function getTranslation() {
-    const match = translateRegex.exec(moveDiv.style.transform);
-    return [parseInt(match[1]), parseInt(match[3])]
+	const style = window.getComputedStyle(moveDiv);
+	const matrix = new WebKitCSSMatrix(style.transform);
+    return [matrix.m41, matrix.m42];
 }
 
 function setTranslate(x, y) {
@@ -253,8 +252,7 @@ onmousemove = (event) => {
 };
 
 for (const zoomElement of zooms) {
-	const re = /([0-9]+)x/;
-    const match = re.exec(zoomElement.id);
+    const match = zoomElement.id.match(/([0-9]+)x/);
     const zoomAmount = parseInt(match[1]);
     zoomElement.onclick = (event) => {
         if (ws === null) {return;}
@@ -263,8 +261,7 @@ for (const zoomElement of zooms) {
 }
 
 for (const colorOption of colorOptions) {
-	const re = /-([0-9]+)/;
-    const match = re.exec(colorOption.id);
+    const match = colorOption.id.match(/-([0-9]+)/);
     const color = parseInt(match[1]);
     colorOption.style.backgroundColor = hexColors[color];
     colorOption.onclick = (event) => {
@@ -328,19 +325,16 @@ function onMessage(event) {
         });
     } else if (event.data.startsWith("PLACE")) {
         // TODO: MAKE SURE CANVAS IS DRAWN FIRST
-		const re = /PLACE (\w*) ([0-9]+) ([0-9]+) ([0-9]+)/;
-        const match = re.exec(event.data);
+        const match = event.data.match(/PLACE (\w*) ([0-9]+) ([0-9]+) ([0-9]+)/);
         placePixel(match[1], parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));
     } else if (event.data.startsWith("CLEAR")) {
-		const re = /CLEAR ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)/;
-        const match = re.exec(event.data);
+        const match = event.data.match(/CLEAR ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)/);
         clearCanvas(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));
     } else if (event.data.startsWith("USERS")) {
         userList = event.data.slice(6).split(' ');
         updatePlaceOutline();
     } else if (event.data.startsWith("COOLDOWN")) {
-		const re = /COOLDOWN ([0-9]+)/;
-        const match = re.exec(event.data);
+        const match = event.data.match(/COOLDOWN ([0-9]+)/);
         startPlaceTimer(parseInt(match[1]));
     } else if (event.data === "AUTHENTICATION SUCCESS") {
         isAuthenticated = true;
