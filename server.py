@@ -291,7 +291,6 @@ class Server:
         return await ws.send("INVALID")
 
     async def handler(self, ws):
-        print(ws, ws.path)
         self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
         print(f"Opened connection with {ws.id}")
         await self.send_canvas_info(ws)
