@@ -34,6 +34,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     "bot.sheppsu.me",
+    "localhost",
 ]
 
 
