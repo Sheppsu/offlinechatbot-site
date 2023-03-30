@@ -291,6 +291,7 @@ class Server:
         return await ws.send("INVALID")
 
     async def handler(self, ws):
+        print(ws, ws.path)
         if ws.path.lower != "/place/ws":
             return
         self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
