@@ -126,17 +126,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "main.User"
 
-LOGGING = {
-    "version": 1,
-    "handlers": {
-        "console": {
-            "level": "INFO",
-            "filters": [],
-            "class": "logging.StreamHandler",
-        }
-    }
-}
-
 ADMINS = [
     ("Sheppsu", "apc2005osu@gmail.com"),
 ]
