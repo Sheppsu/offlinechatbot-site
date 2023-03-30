@@ -361,7 +361,7 @@ function connect() {
     fetch("/token").then(response => {
         return response.json();
     }).then(authdata => {
-        ws = new WebSocket("wss://bot.sheppsu.me/");
+        ws = new WebSocket("wss://bot.sheppsu.me/place/ws");
         ws.binaryType = "blob";
         ws.onopen = (event) => {onOpen(event, authdata);};
         ws.onmessage = onMessage;

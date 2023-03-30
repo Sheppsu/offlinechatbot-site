@@ -19,7 +19,7 @@ from sesame.utils import get_user as _get_user
 
 
 UserModel = get_user_model()
-COOLDOWN = 10
+COOLDOWN = 300
 
 
 class User:
@@ -291,6 +291,8 @@ class Server:
         return await ws.send("INVALID")
 
     async def handler(self, ws):
+        if ws.path.lower != "/place/ws":
+            return
         self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
         print(f"Opened connection with {ws.id}")
         await self.send_canvas_info(ws)
@@ -304,7 +306,7 @@ class Server:
             del self.connections[ws.id]
 
     async def run(self):
-        async with websockets.serve(self.handler, "0.0.0.0", os.getenv("PORT")):
+        async with websockets.serve(self.handler, "0.0.0.0", 443):
             print("Server up!")
             await asyncio.Future()  # run forever
 
