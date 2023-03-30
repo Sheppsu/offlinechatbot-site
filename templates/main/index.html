@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block body %}
+<div class="content-container">
+    <h1>Website of sheppsubot</h1>
+    <hr>
+    <p class="description">
+        sheppsubot is a Twitch offline chat bot created by <a href="https://sheppsu.me">sheppsu</a> (OfCourse).
+        It runs in several channels, but there is currently no way to manually add it (soon™ to come). You can check
+        out the <a href="{% url 'docs' %}">docs</a> or go have some fun in <a href="{% url 'canvas' %}">offlinechat place</a>.
+    </p>
+</div>
+{% endblock body %}
+{% block headerid %}home{% endblock headerid %}

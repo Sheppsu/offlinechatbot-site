@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Documentation{% endblock title %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/docs.css' %}">
+{% endblock head %}
+{% block body %}
+<div class="content-container">
+    <h1>Commands</h1>
+    <hr>
+    <div id="commands-container"></div>
+</div>
+<script src="{% static 'js/commandMenu.js' %}"></script>
+{% endblock body %}
+{% block headerid %}docs{% endblock headerid %}
