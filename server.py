@@ -87,7 +87,8 @@ class WebsocketWrapper:
         return getattr(self.ws, item)
 
     async def send(self, msg):
-        _log.info(f"Replying to {self.ws.id}: {msg}")
+        if type(msg) == str and len(msg) < 1000:
+            _log.info(f"Replying to {self.ws.id}: {msg}")
         await self.ws.send(msg)
 
 
