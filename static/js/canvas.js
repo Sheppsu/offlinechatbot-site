@@ -245,6 +245,7 @@ onmouseup = (event) => {
 
 onmousemove = (event) => {
     if (ws === null) {return;}
+    pressed = (event.buttons !== undefined ? event.buttons : event.which) & 1 === 1;
     mousePos[0] = event.clientX;
     mousePos[1] = event.clientY;
     if (pressed) {
