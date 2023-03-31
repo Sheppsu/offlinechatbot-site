@@ -21,7 +21,7 @@ from sesame.utils import get_user as _get_user
 
 
 UserModel = get_user_model()
-COOLDOWN = 120
+COOLDOWN = 0
 _log = logging.getLogger(__name__)
 _log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
@@ -282,8 +282,8 @@ class Server:
         print(f"{ws.user.name} placed {c} at ({x}, {y})")
         event = f"PLACE {ws.user.name} {x} {y} {c}"
         await ws.send(event)
-        for other_ws in self.get_same_users(ws.user.id):
-            await other_ws.send(f"COOLDOWN {int((ws.user.last_placement+COOLDOWN)*1000)}")
+        # for other_ws in self.get_same_users(ws.user.id):
+        #     await other_ws.send(f"COOLDOWN {int((ws.user.last_placement+COOLDOWN)*1000)}")
         await self.send_all(event, [ws.id])
 
     async def handle_ban(self, ws, args):
