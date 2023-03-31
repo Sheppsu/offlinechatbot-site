@@ -301,6 +301,13 @@ if (banButton) {
 
 // websocket
 
+function doWhenTrue(callback, check) {
+	if (check()) {
+		return callback();
+	}
+	setTimeout(doWhenTrue, 100, callback, check);
+}
+
 function popupError(message, timer = null) {
     errorLabel.innerHTML = message;
     if (errorBox.hasAttribute("hidden")) {
@@ -334,9 +341,9 @@ function onMessage(event) {
             loadCanvas(data);
         });
     } else if (event.data.startsWith("PLACE")) {
-        // TODO: MAKE SURE CANVAS IS DRAWN FIRST
         const match = event.data.match(/PLACE (\w*) ([0-9]+) ([0-9]+) ([0-9]+)/);
-        placePixel(match[1], parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));
+		doWhenTrue(() => {return isAuthenticated == true;}, 
+			() => {placePixel(match[1], parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));});
     } else if (event.data.startsWith("CLEAR")) {
         const match = event.data.match(/CLEAR ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)/);
         clearCanvas(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));
@@ -345,7 +352,8 @@ function onMessage(event) {
         updatePlaceOutline();
     } else if (event.data.startsWith("COOLDOWN")) {
         const match = event.data.match(/COOLDOWN ([0-9]+)/);
-        startPlaceTimer(parseInt(match[1]));
+		doWhenTrue(() => {return isAuthenticated == true;}, 
+			() => {startPlaceTimer(parseInt(match[1]));});
     } else if (event.data === "AUTHENTICATION SUCCESS") {
         isAuthenticated = true;
         setColor(0);
