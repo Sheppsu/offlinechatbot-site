@@ -270,6 +270,12 @@ onwheel = (event) => {
 	}
 };
 
+onkeydown = (event) => {
+    if (event.key == "Enter") {
+        onPlace();
+    }
+};
+
 for (const zoomElement of zooms) {
     const match = zoomElement.id.match(/([0-9]+)x/);
     const zoomAmount = parseInt(match[1]);
@@ -289,11 +295,13 @@ for (const colorOption of colorOptions) {
     }
 }
 
-placeButton.onclick = (event) => {
+function onPlace(event = null) {
     if (!isAuthenticated || currentZoomAmount < 8 || onCooldown) {return;}
     const pos = getPlacePos();
     ws.send("PLACE "+Math.round(pos[0])+" "+Math.round(pos[1])+" "+currentlySelectedColor);
-};
+}
+
+placeButton.onclick = onPlace;
 
 if (clearButton) {
     clearButton.onclick = (event) => {
