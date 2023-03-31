@@ -10,6 +10,7 @@ from typing import Union, Optional
 from dotenv import load_dotenv
 from functools import partial
 import logging
+import math
 
 load_dotenv()
 os.environ["DJANGO_SETTINGS_MODULE"] = "offlinechatbot.settings"
@@ -52,7 +53,7 @@ class User:
     def on_place(self):
         if self.banned or (current_time := time()) - self.last_placement < COOLDOWN:
             return False
-        self.last_placement = round(current_time)
+        self.last_placement = current_time
         user = self.get_object()
         user.blocks_placed += 1
         user.last_placement = self.last_placement
@@ -242,7 +243,7 @@ class Server:
 
         await ws.send("AUTHENTICATION SUCCESS")
         if time() - ws.user.last_placement < COOLDOWN:
-            await ws.send(f"COOLDOWN {(ws.user.last_placement+COOLDOWN)*1000}")
+            await ws.send(f"COOLDOWN {int((ws.user.last_placement+COOLDOWN)*1000)}")
 
     async def handle_clear(self, ws, args):
         if not ws.user.is_authenticated or not ws.user.on_clear():
@@ -280,7 +281,7 @@ class Server:
         event = f"PLACE {ws.user.name} {x} {y} {c}"
         await ws.send(event)
         for other_ws in self.get_same_users(ws.user.id):
-            await other_ws.send(f"COOLDOWN {(ws.user.last_placement+COOLDOWN)*1000}")
+            await other_ws.send(f"COOLDOWN {int((ws.user.last_placement+COOLDOWN)*1000)}")
         await self.send_all(event, [ws.id])
 
     async def handle_ban(self, ws, args):
