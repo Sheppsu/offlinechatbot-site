@@ -266,7 +266,7 @@ class Server:
         await self.send_all(event, [ws.id])
 
     async def handle_place(self, ws, args):
-        if not ws.user.is_authenticated or not await self.loop.run_in_executor(self.executor, ws.user.on_place):
+        if not ws.user.is_authenticated:
             return "FORBIDDEN"
         if len(args) != 3:
             return "INVALID"
@@ -276,6 +276,8 @@ class Server:
             return "INVALID"
         if c > 35:
             return "INVALID"
+        if not await self.loop.run_in_executor(self.executor, ws.user.on_place):
+            return "FORBIDDEN"
         await self.loop.run_in_executor(self.executor, self.canvas.place_pixel, ws.user, x, y, c)
         print(f"{ws.user.name} placed {c} at ({x}, {y})")
         event = f"PLACE {ws.user.name} {x} {y} {c}"
