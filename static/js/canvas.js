@@ -50,11 +50,11 @@ var isAuthenticated = false;
 var currentlySelectedColor = 0;
 var pressed = false;
 var mousePos = [0, 0];
-var lastScroll = 0;
 var currentZoom = null;
 var currentZoomAmount = 1;
 var userList = [];
 var onCooldown = false;
+var scrollAmount = 0;
 
 // canvas drawing
 
@@ -253,6 +253,24 @@ onmousemove = (event) => {
     }
 };
 
+onwheel = (event) => {
+	scrollAmount += event.deltaY;
+	console.log(scrollAmount);
+	if (scrollAmount <= -50) {
+		scrollAmount = 0;
+		if (currentZoomAmount < 32) {
+			const zoom = currentZoomAmount * 2;
+			setZoom(document.getElementById("zoom-"+zoom+"x"), zoom);
+		}
+	} else if (scrollAmount >= 50) {
+		scrollAmount = 0;
+		if (currentZoomAmount > 1) {
+			const zoom = currentZoomAmount / 2;
+			setZoom(document.getElementById("zoom-"+zoom+"x"), zoom);
+		}
+	}
+};
+
 for (const zoomElement of zooms) {
     const match = zoomElement.id.match(/([0-9]+)x/);
     const zoomAmount = parseInt(match[1]);
@@ -386,6 +404,8 @@ function connect() {
         return response.json();
     }).then(authdata => {
         ws = new WebSocket("wss://place-ws.sheppsu.me");
+		// for local testing
+		// ws = new WebSocket("ws://localhost:8727");
         ws.binaryType = "blob";
         ws.onopen = (event) => {onOpen(event, authdata);};
         ws.onmessage = onMessage;
