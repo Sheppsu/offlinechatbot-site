@@ -150,7 +150,7 @@ class Canvas:
 
     def get_last_pixel(self, x, y):
         self.lock.acquire()
-        placement = self.db.placements.find({"coordinate": [250, 250]}).sort({"timestamp": -1}).limit(1)
+        placement = self.db.placements.find_one({"coordinate": [x, y]}, sort=[('timestamp', -1)])
         self.lock.release()
         return placement
 
@@ -284,9 +284,9 @@ class Server:
             return "INVALID"
         if c > 35 or x < 0 or x > 499 or y < 0 or y > 499:
             return "INVALID"
-        # last_placement = await self.loop.run_in_executor(self.executor, self.canvas.get_last_pixel, x, y)
-        # if last_placement and last_placement["user"] == ws.user.name and last_placement["color"] == c:
-        #     return "FORBIDDEN"
+        last_placement = await self.loop.run_in_executor(self.executor, self.canvas.get_last_pixel, x, y)
+        if last_placement and last_placement["user"] == ws.user.name and last_placement["color"] == c:
+            return "FORBIDDEN"
         if not await self.loop.run_in_executor(self.executor, ws.user.on_place):
             return "FORBIDDEN"
         await self.loop.run_in_executor(self.executor, self.canvas.place_pixel, ws.user, x, y, c)
