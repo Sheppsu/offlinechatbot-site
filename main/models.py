@@ -38,7 +38,7 @@ class User(AbstractBaseUser):
     type = models.PositiveSmallIntegerField(choices=UserType.choices, default=UserType.USER)
 
     blocks_placed = models.PositiveIntegerField(default=0)
-    last_placement = models.PositiveBigIntegerField(default=0)
+    last_placement = models.FloatField(default=0)
 
     refresh_token = models.CharField(max_length=64, default="")
 
