@@ -342,8 +342,12 @@ function onMessage(event) {
         });
     } else if (event.data.startsWith("PLACE")) {
         const match = event.data.match(/PLACE (\w*) ([0-9]+) ([0-9]+) ([0-9]+)/);
+		const user = match[1];
+		const x = parseInt(match[2]);
+		const y = parseInt(match[3]);
+		const color = parseInt(match[4]);
 		doWhenTrue(() => {return isAuthenticated == true;}, 
-			() => {placePixel(match[1], parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));});
+			() => {placePixel(user, x, y, color);});
     } else if (event.data.startsWith("CLEAR")) {
         const match = event.data.match(/CLEAR ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)/);
         clearCanvas(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));
@@ -352,8 +356,9 @@ function onMessage(event) {
         updatePlaceOutline();
     } else if (event.data.startsWith("COOLDOWN")) {
         const match = event.data.match(/COOLDOWN ([0-9]+)/);
+		const cooldown = parseInt(match[1]);
 		doWhenTrue(() => {return isAuthenticated == true;}, 
-			() => {startPlaceTimer(parseInt(match[1]));});
+			() => {startPlaceTimer(cooldown);});
     } else if (event.data === "AUTHENTICATION SUCCESS") {
         isAuthenticated = true;
         setColor(0);
@@ -378,7 +383,8 @@ function connect() {
     fetch("/token").then(response => {
         return response.json();
     }).then(authdata => {
-        ws = new WebSocket("wss://place-ws.sheppsu.me");
+        // ws = new WebSocket("wss://place-ws.sheppsu.me");
+		ws = new WebSocket("ws://localhost:8727");
         ws.binaryType = "blob";
         ws.onopen = (event) => {onOpen(event, authdata);};
         ws.onmessage = onMessage;
