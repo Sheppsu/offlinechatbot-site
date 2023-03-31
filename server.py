@@ -21,7 +21,7 @@ from sesame.utils import get_user as _get_user
 
 
 UserModel = get_user_model()
-COOLDOWN = 300
+COOLDOWN = 120
 _log = logging.getLogger(__name__)
 _log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
