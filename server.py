@@ -274,7 +274,7 @@ class Server:
             x, y, c = tuple(map(int, args))
         except ValueError:
             return "INVALID"
-        if c > 15:
+        if c > 35:
             return "INVALID"
         await self.loop.run_in_executor(self.executor, self.canvas.place_pixel, ws.user, x, y, c)
         print(f"{ws.user.name} placed {c} at ({x}, {y})")
