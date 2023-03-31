@@ -255,7 +255,6 @@ onmousemove = (event) => {
 
 onwheel = (event) => {
 	scrollAmount += event.deltaY;
-	console.log(scrollAmount);
 	if (scrollAmount <= -50) {
 		scrollAmount = 0;
 		if (currentZoomAmount < 32) {
