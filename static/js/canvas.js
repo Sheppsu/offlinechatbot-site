@@ -156,7 +156,7 @@ function startPlaceTimer(time, first = true) {
     const diff = (time - Date.now()) / 1000;
     if (diff > 0) {
         const minute = Math.floor(diff / 60);
-        const seconds = Math.ceil(diff % 60);
+        const seconds = Math.floor(diff % 60);
         placeLabel.innerHTML = ""+minute+":"+(seconds < 10 ? "0":"")+seconds;
         setTimeout(startPlaceTimer, 100, time, false);
     } else {
