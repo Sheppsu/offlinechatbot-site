@@ -128,6 +128,8 @@ class Canvas:
         self.canvas_cache = bytearray(250000)
         users = ["" for _ in range(250000)]  # TODO: look into using numpy
         for item in canvas_info:
+            if item[0] >= len(users):
+                continue
             users[item[0]] = item[1]
             self.canvas_cache[item[0]] = item[2]
         self.user_cache = " ".join(users)
@@ -145,6 +147,12 @@ class Canvas:
         _log.info("Canvas info retrieved.")
         self.lock.release()
         return self.canvas_cache, self.user_cache
+
+    def get_last_pixel(self, x, y):
+        self.lock.acquire()
+        placement = self.db.placements.find({"coordinate": [250, 250]}).sort({"timestamp": -1}).limit(1)
+        self.lock.release()
+        return placement
 
     def place_pixel(self, user: User, x: int, y: int, c: int):
         self.lock.acquire()
@@ -274,8 +282,11 @@ class Server:
             x, y, c = tuple(map(int, args))
         except ValueError:
             return "INVALID"
-        if c > 35:
+        if c > 35 or x < 0 or x > 499 or y < 0 or y > 499:
             return "INVALID"
+        # last_placement = await self.loop.run_in_executor(self.executor, self.canvas.get_last_pixel, x, y)
+        # if last_placement and last_placement["user"] == ws.user.name and last_placement["color"] == c:
+        #     return "FORBIDDEN"
         if not await self.loop.run_in_executor(self.executor, ws.user.on_place):
             return "FORBIDDEN"
         await self.loop.run_in_executor(self.executor, self.canvas.place_pixel, ws.user, x, y, c)
