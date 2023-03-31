@@ -148,6 +148,7 @@ function updatePlaceOutline() {
 }
 
 function startPlaceTimer(time, first = true) {
+	console.log(first);
     if (!isAuthenticated) {return;}
     if (first) {
         onCooldown = true;
@@ -307,10 +308,9 @@ function checkIsAuthenticated() {
 
 function doWhenTrue(check, callback) {
 	if (check()) {
-		callback.apply(arguments);
 		return callback();
 	}
-	setTimeout(doWhenTrue, 100, callback, check);
+	setTimeout(doWhenTrue, 100, check, callback);
 }
 
 function popupError(message, timer = null) {
@@ -351,7 +351,7 @@ function onMessage(event) {
 		const x = parseInt(match[2]);
 		const y = parseInt(match[3]);
 		const color = parseInt(match[4]);
-		doWhenTrue(checkIsAuthenticated, placePixel, user, x, y, color);
+		doWhenTrue(checkIsAuthenticated, () => {placePixel(user, x, y, color);});
     } else if (event.data.startsWith("CLEAR")) {
         const match = event.data.match(/CLEAR ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)/);
         clearCanvas(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));
@@ -361,7 +361,7 @@ function onMessage(event) {
     } else if (event.data.startsWith("COOLDOWN")) {
         const match = event.data.match(/COOLDOWN ([0-9]+)/);
 		const cooldown = parseInt(match[1]);
-		doWhenTrue(checkIsAuthenticated, startPlaceTimer, cooldown);
+		doWhenTrue(checkIsAuthenticated, () => {startPlaceTimer(cooldown);});
     } else if (event.data === "AUTHENTICATION SUCCESS") {
         isAuthenticated = true;
         setColor(0);
