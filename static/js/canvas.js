@@ -153,7 +153,7 @@ function startPlaceTimer(time, first = true) {
         onCooldown = true;
         placeButton.classList.add("place-button-cooldown");
     }
-    const diff = Math.floor((time - Date.now()) / 1000);
+    const diff = time - Date.now();
     if (diff > 0) {
         const minute = Math.floor(diff / 60);
         const seconds = diff % 60;
