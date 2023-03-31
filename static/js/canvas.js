@@ -148,7 +148,6 @@ function updatePlaceOutline() {
 }
 
 function startPlaceTimer(time, first = true) {
-	console.log(first);
     if (!isAuthenticated) {return;}
     if (first) {
         onCooldown = true;
