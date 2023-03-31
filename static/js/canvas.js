@@ -301,8 +301,13 @@ if (banButton) {
 
 // websocket
 
-function doWhenTrue(callback, check) {
+function checkIsAuthenticated() {
+	return isAuthenticated;
+}
+
+function doWhenTrue(check, callback) {
 	if (check()) {
+		callback.apply(arguments);
 		return callback();
 	}
 	setTimeout(doWhenTrue, 100, callback, check);
@@ -346,8 +351,7 @@ function onMessage(event) {
 		const x = parseInt(match[2]);
 		const y = parseInt(match[3]);
 		const color = parseInt(match[4]);
-		doWhenTrue(() => {return isAuthenticated == true;}, 
-			() => {placePixel(user, x, y, color);});
+		doWhenTrue(checkIsAuthenticated, placePixel, user, x, y, color);
     } else if (event.data.startsWith("CLEAR")) {
         const match = event.data.match(/CLEAR ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)/);
         clearCanvas(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), parseInt(match[4]));
@@ -357,8 +361,7 @@ function onMessage(event) {
     } else if (event.data.startsWith("COOLDOWN")) {
         const match = event.data.match(/COOLDOWN ([0-9]+)/);
 		const cooldown = parseInt(match[1]);
-		doWhenTrue(() => {return isAuthenticated == true;}, 
-			() => {startPlaceTimer(cooldown);});
+		doWhenTrue(checkIsAuthenticated, startPlaceTimer, cooldown);
     } else if (event.data === "AUTHENTICATION SUCCESS") {
         isAuthenticated = true;
         setColor(0);
