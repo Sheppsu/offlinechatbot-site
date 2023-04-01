@@ -83,6 +83,7 @@ class WebsocketWrapper:
     def __init__(self, ws, user: "USER_TYPE"):
         self.ws = ws
         self.user: USER_TYPE = user
+        self.last_message = None
 
     def __getattr__(self, item):
         return getattr(self.ws, item)
@@ -91,6 +92,18 @@ class WebsocketWrapper:
         if type(msg) == str and msg != "PONG" and len(msg) < 1000:
             _log.info(f"Replying to {self.ws.id}: {msg}")
         await self.ws.send(msg)
+        
+    async def recv(self):
+        msg = await self.ws.recv()
+        if not self.on_message(msg):
+            return
+        return msg
+        
+    def on_message(self, msg):
+        if self.last_message is not None and self.last_message.lower().strip() == msg.lower().strip():
+            return False
+        self.last_message = msg
+        return True
 
 
 USER_TYPE = Union[User, AnonymousUser]
@@ -338,6 +351,8 @@ class Server:
         try:
             while True:
                 command = await ws.recv()
+                if command is None:
+                    continue
                 await self.handle_command(ws, command)
         except websockets.ConnectionClosed:
             _log.info(f"Closed connection with {ws.id}")
