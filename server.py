@@ -95,8 +95,8 @@ class WebsocketWrapper:
         
     async def recv(self):
         msg = await self.ws.recv()
-        if not self.on_message(msg):
-            return
+        # if not self.on_message(msg):
+        #     return
         return msg
         
     def on_message(self, msg):
