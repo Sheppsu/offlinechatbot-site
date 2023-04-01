@@ -83,7 +83,7 @@ class WebsocketWrapper:
     def __init__(self, ws, user: "USER_TYPE"):
         self.ws = ws
         self.user: USER_TYPE = user
-        self.last_message = None
+        self.last_message = ""
 
     def __getattr__(self, item):
         return getattr(self.ws, item)
@@ -93,17 +93,12 @@ class WebsocketWrapper:
             _log.info(f"Replying to {self.ws.id}: {msg}")
         await self.ws.send(msg)
         
-    async def recv(self):
+    async def recv(self, do_check=False):
         msg = await self.ws.recv()
-        # if not self.on_message(msg):
-        #     return
-        return msg
-        
-    def on_message(self, msg):
-        if self.last_message is not None and self.last_message.lower().strip() == msg.lower().strip():
-            return False
+        if do_check and self.last_message.lower() == msg.lower():
+            return None
         self.last_message = msg
-        return True
+        return self.last_message
 
 
 USER_TYPE = Union[User, AnonymousUser]
@@ -210,6 +205,7 @@ class Server:
             "BAN": self.handle_ban,
             "PING": self.handle_ping,
         }
+        self.last_place = None
 
     async def send_canvas_info(self, ws):
         """event loop safe"""
@@ -230,9 +226,10 @@ class Server:
     async def send_all(self, message, exclude=None):
         if exclude is None:
             exclude = []
-        for ws_id, ws in self.connections.items():
-            if ws_id not in exclude:
-                await ws.send(message)
+        await self.loop.run_in_executor(
+            self.executor, websockets.broadcast, 
+            filter(lambda ws: ws.id not in exclude, self.connections.values()), 
+            message)
 
     def get_same_users(self, user_id):
         """event loop safe"""
@@ -305,6 +302,7 @@ class Server:
         await self.loop.run_in_executor(self.executor, self.canvas.place_pixel, ws.user, x, y, c)
         print(f"{ws.user.name} placed {c} at ({x}, {y})")
         event = f"PLACE {ws.user.name} {x} {y} {c}"
+        self.last_place = ws.user.id
         await ws.send(event)
         # for other_ws in self.get_same_users(ws.user.id):
         #     await other_ws.send(f"COOLDOWN {int((ws.user.last_placement+COOLDOWN)*1000)}")
@@ -332,7 +330,8 @@ class Server:
     # Event functionality
 
     async def handle_command(self, ws, command):
-        _log.info(f"{ws.id}: {command}")
+        if command.lower() != "ping":
+            _log.info(f"{ws.id}: {command}")
         command = command.split()
         if len(command) < 1:
             return await ws.send("INVALID")
@@ -350,7 +349,7 @@ class Server:
         await self.send_canvas_info(ws)
         try:
             while True:
-                command = await ws.recv()
+                command = await ws.recv(do_check=ws.user.is_authenticated and self.last_place == ws.user.id)
                 if command is None:
                     continue
                 await self.handle_command(ws, command)
