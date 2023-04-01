@@ -282,7 +282,7 @@ class Server:
             x, y, c = tuple(map(int, args))
         except ValueError:
             return "INVALID"
-        if c > 35 or x < 0 or x > 499 or y < 0 or y > 499:
+        if c > 39 or x < 0 or x > 499 or y < 0 or y > 499:
             return "INVALID"
         last_placement = await self.loop.run_in_executor(self.executor, self.canvas.get_last_pixel, x, y)
         if last_placement and last_placement["user"] == ws.user.name and last_placement["color"] == c:
