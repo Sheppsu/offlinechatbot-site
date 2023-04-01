@@ -6,11 +6,10 @@ import os
 from time import time
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from typing import Union, Optional
+from typing import Union
 from dotenv import load_dotenv
 from functools import partial
 import logging
-import math
 
 load_dotenv()
 os.environ["DJANGO_SETTINGS_MODULE"] = "offlinechatbot.settings"
@@ -21,7 +20,6 @@ from sesame.utils import get_user as _get_user
 
 
 UserModel = get_user_model()
-COOLDOWN = 0
 _log = logging.getLogger(__name__)
 _log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
@@ -51,25 +49,31 @@ class User:
         self.banned = user.banned
 
     def on_place(self):
-        if self.banned or (current_time := time()) - self.last_placement < COOLDOWN:
-            return False
-        self.last_placement = current_time
+        self.last_placement = time()
         user = self.get_object()
         user.blocks_placed += 1
         user.last_placement = self.last_placement
         self.update(user)
         user.save()
-        return True
 
-    def on_clear(self):
-        if not self.can_mod:
-            return False
-        return True
+    def can_place(self, cooldown):
+        return not (self.banned or time() - self.last_placement < cooldown)
 
-    def on_ban(self):
-        if not self.can_mod:
-            return False
-        return True
+    @property
+    def can_clear(self):
+        return self.can_mod
+
+    @property
+    def can_ban(self):
+        return self.can_mod
+
+    @property
+    def can_set_cooldown(self):
+        return self.can_mod
+
+    @property
+    def can_clear_user(self):
+        return self.can_mod
 
     def get_object(self):
         return UserModel.objects.get(id=self.id)
@@ -182,7 +186,10 @@ class Canvas:
 
 
 class Server:
+    DEFAULT_COOLDOWN = 0
+
     def __init__(self):
+        self.cooldown = self.DEFAULT_COOLDOWN
         self.executor = ThreadPoolExecutor()
         self.loop = asyncio.get_event_loop()
         self.canvas = Canvas()
@@ -194,6 +201,8 @@ class Server:
             "CLEAR": self.handle_clear,
             "BAN": self.handle_ban,
             "PING": self.handle_ping,
+            "SETCOOLDOWN": self.handle_set_cooldown,
+            "CLEARUSER": self.handle_clear_user,
         }
         self.last_place = None
 
@@ -218,7 +227,8 @@ class Server:
             exclude = []
         await self.loop.run_in_executor(
             self.executor, websockets.broadcast, 
-            filter(lambda ws: ws.id not in exclude, self.connections.values()), 
+            filter(lambda ws: ws.id not in exclude, self.connections.values()) \
+                if len(exclude) > 0 else self.connections.values(),
             message)
 
     def get_same_users(self, user_id):
@@ -250,11 +260,11 @@ class Server:
             ws.user = User(result)
 
         await ws.send("AUTHENTICATION SUCCESS")
-        if time() - ws.user.last_placement < COOLDOWN:
-            await ws.send(f"COOLDOWN {int((ws.user.last_placement+COOLDOWN)*1000)}")
+        if time() - ws.user.last_placement < self.cooldown:
+            await ws.send(f"COOLDOWN {int((ws.user.last_placement+self.cooldown)*1000)}")
 
     async def handle_clear(self, ws, args):
-        if not ws.user.is_authenticated or not ws.user.on_clear():
+        if not ws.user.is_authenticated or not ws.user.can_clear:
             return "FORBIDDEN"
         if len(args) != 4:
             return "INVALID"
@@ -274,7 +284,7 @@ class Server:
         await self.send_all(event, [ws.id])
 
     async def handle_place(self, ws, args):
-        if not ws.user.is_authenticated:
+        if not ws.user.is_authenticated or not ws.user.can_place(self.cooldown):
             return "FORBIDDEN"
         if len(args) != 3:
             return "INVALID"
@@ -287,19 +297,19 @@ class Server:
         last_placement = await self.loop.run_in_executor(self.executor, self.canvas.get_last_pixel, x, y)
         if last_placement and last_placement["user"] == ws.user.name and last_placement["color"] == c:
             return "FORBIDDEN"
-        if not await self.loop.run_in_executor(self.executor, ws.user.on_place):
-            return "FORBIDDEN"
         await self.loop.run_in_executor(self.executor, self.canvas.place_pixel, ws.user, x, y, c)
+        await self.loop.run_in_executor(self.executor, ws.user.on_place)
         print(f"{ws.user.name} placed {c} at ({x}, {y})")
         event = f"PLACE {ws.user.name} {x} {y} {c}"
         self.last_place = ws.user.id
         await ws.send(event)
-        # for other_ws in self.get_same_users(ws.user.id):
-        #     await other_ws.send(f"COOLDOWN {int((ws.user.last_placement+COOLDOWN)*1000)}")
+        if self.cooldown > 0:
+            for other_ws in self.get_same_users(ws.user.id):
+                await other_ws.send(f"COOLDOWN {int((ws.user.last_placement+self.cooldown)*1000)}")
         await self.send_all(event, [ws.id])
 
     async def handle_ban(self, ws, args):
-        if not ws.user.is_authenticated or not ws.user.on_ban():
+        if not ws.user.is_authenticated or not ws.user.can_ban:
             return "FORBIDDEN"
         if len(args) < 1:
             return "INVALID"
@@ -316,6 +326,30 @@ class Server:
 
     async def handle_ping(self, ws, args):
         await ws.send("PONG")
+
+    async def handle_set_cooldown(self, ws, args):
+        if not ws.user.is_authenticated or not ws.user.can_set_cooldown:
+            return "FORBIDDEN"
+        if len(args) < 1:
+            return "INVALID"
+        try:
+            self.cooldown = int(args[0])
+        except ValueError:
+            return "INVALID"
+        await self.send_all(f"COOLDOWNCHANGE {self.cooldown}")
+
+    async def handle_clear_user(self, ws, args):
+        if not ws.user.is_authenticated or not ws.user.can_clear_user:
+            return "FORBIDDEN"
+        if len(args) < 1:
+            return "INVALID"
+        await self.loop.run_in_executor(self.executor, self.canvas.clear_user, args[0])
+        if self.canvas.canvas_cache is None:
+            # Not using websockets.broadcast because it does not use fragmenting and this is sizeable data
+            canvas, users = await self.loop.run_in_executor(self.executor, self.canvas.get_canvas_info)
+            for ws in self.connections.values():
+                await ws.send(canvas)
+                await ws.send(users)
 
     # Event functionality
 

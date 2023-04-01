@@ -41,6 +41,8 @@ const clearX2 = document.getElementById("clear-x2");
 const clearY2 = document.getElementById("clear-y2");
 const banButton = document.getElementById("ban-button");
 const banInput = document.getElementById("ban-input");
+const cooldownButton = document.getElementById("cooldown-button");
+const cooldownInput = document.getElementById("cooldown-input");
 const errorBox = document.getElementById("error-container");
 const errorLabel = document.getElementById("error-label");
 
@@ -322,6 +324,16 @@ if (banButton) {
         if (!isAuthenticated) {return;}
         const user = banInput.value;
         ws.send("BAN "+user);
+        banInput.value = "";
+    }
+}
+
+if (cooldownButton) {
+    cooldownButton.onclick = (event) => {
+        if (!isAuthenticated) {return;}
+        const cooldown = cooldownInput.value;
+        ws.send("SETCOOLDOWN "+cooldown);
+        cooldownInput.value = "";
     }
 }
 

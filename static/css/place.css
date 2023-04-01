@@ -5,14 +5,7 @@
     --place-pos-height: 20px;
     --place-button-width: 250px;
     --place-button-height: 50px;
-    --clear-button-width: 120px;
-    --clear-button-height: 25px;
-    --clear-input-width: calc((var(--clear-button-width) - 20px)/2);
-    --clear-input-height: calc(var(--clear-button-height) - 5px);
-    --clear-left-margin: calc(100vw - var(--clear-button-width) - 50px);
-    --ban-button-width: 120px;
-    --ban-button-height: 25px;
-    --ban-button-top-margin: calc(100px + var(--clear-button-height) + var(--clear-input-height) * 2);
+
     --error-width: 500px;
     --picking-color: #cccccc;
     --main-color1: #ff8b00;
@@ -80,6 +73,11 @@ input[type=number] {
     background-color: #ffffff;
     text-align: center;
     user-select: none;
+}
+
+.contained {
+    margin: 5px 0;
+    position: relative;
 }
 
 #zoom-bar {
@@ -177,10 +175,17 @@ input[type=number] {
     background-color: transparent;
 }
 
+#control-panel {
+    width: 150px;
+    margin: 70px 0 0 calc(100vw - 200px);
+
+    background-color:transparent;
+    border-style: none;
+}
+
 #clear-button {
-    width: var(--clear-button-width);
-    height: var(--clear-button-height);
-    margin: 70px 0 0 calc(100vw - var(--clear-button-width) - 50px);
+    width: 100%;
+    height: 25px;
 
     background-color: #17E87D;
     cursor: pointer;
@@ -191,30 +196,13 @@ input[type=number] {
 }
 
 .clear-input {
-    width: var(--clear-input-width);
-    height: var(--clear-input-height);
-}
-
-#clear-x1 {
-    margin: calc(80px + var(--clear-button-height)) 0 0 var(--clear-left-margin);
-}
-
-#clear-y1 {
-    margin: calc(80px + var(--clear-button-height)) 0 0 calc(var(--clear-left-margin) + var(--clear-input-width) + 15px);
-}
-
-#clear-x2 {
-    margin: calc(90px + var(--clear-button-height) + var(--clear-input-height)) 0 0 var(--clear-left-margin);
-}
-
-#clear-y2 {
-    margin: calc(90px + var(--clear-button-height) + var(--clear-input-height)) 0 0 calc(var(--clear-left-margin) + var(--clear-input-width) + 15px);
+    width: 100%;
+    height: 25px;
 }
 
 #ban-button {
-    width: var(--ban-button-width);
-    height: var(--ban-button-height);
-    margin: var(--ban-button-top-margin) 0 0 var(--clear-left-margin);
+    width: 100%;
+    height: 25px;
 
     background-color: #ff0000;
     cursor: pointer;
@@ -225,9 +213,23 @@ input[type=number] {
 }
 
 #ban-input {
-    width: var(--ban-button-width);
-    height: var(--ban-button-height);
-    margin: calc(10px + var(--ban-button-top-margin) + var(--ban-button-height)) 0 0 var(--clear-left-margin);
+    width: 100%;
+    height: 25px;
+}
+
+#cooldown-button {
+    width: 100%;
+    height: 25px;
+    background-color: #346eeb;
+}
+
+#cooldown-button:hover {
+    background-color: #2753b3;
+}
+
+#cooldown-input {
+    width: 100%;
+    height: 25px;
 }
 
 #user-label-container {
