@@ -90,7 +90,7 @@ class WebsocketWrapper:
 
     async def send(self, msg):
         if type(msg) == str and msg != "PONG" and len(msg) < 1000:
-            _log.info(f"Replying to {self.ws.id}: {msg}")
+            _log.info(f"Sending to {self.ws.id}: {msg}")
         await self.ws.send(msg)
         
     async def recv(self, do_check=False):
@@ -122,7 +122,6 @@ class Canvas:
         }
 
     def _update_cache(self):
-        _log.info("Updating cache...")
         query = self.db.placements.aggregate([{"$group": {
             "_id": "$coordinate",
             "user": {"$last": "$user"},
@@ -141,7 +140,6 @@ class Canvas:
             users[item[0]] = item[1]
             self.canvas_cache[item[0]] = item[2]
         self.user_cache = " ".join(users)
-        _log.info("Cache updated!")
 
     def reset_cache(self):
         self.canvas_cache = None
@@ -149,10 +147,8 @@ class Canvas:
 
     def get_canvas_info(self):
         self.lock.acquire()
-        _log.info("Getting canvas info...")
         if self.canvas_cache is None or self.user_cache is None:
             self._update_cache()
-        _log.info("Canvas info retrieved.")
         self.lock.release()
         return self.canvas_cache, self.user_cache
 
@@ -164,30 +160,24 @@ class Canvas:
 
     def place_pixel(self, user: User, x: int, y: int, c: int):
         self.lock.acquire()
-        _log.info("Inserting placement...")
         self.db.placements.insert_one(self.create_placement(user.name, x, y, c))
         self.reset_cache()
-        _log.info("Placement inserted")
         self.lock.release()
 
     def clear_canvas(self, x1: int, y1: int, x2: int, y2: int):
         self.lock.acquire()
-        _log.info("Clearing canvas...")
         timestamp = time()
         self.db.placements.insert_many(sum([
             [self.create_placement("", x, y, 0, timestamp)
              for y in range(y1, y2+1)]
             for x in range(x1, x2+1)], []))
         self.reset_cache()
-        _log.info("Canvas cleared.")
         self.lock.release()
 
     def clear_user(self, user):
         self.lock.acquire()
-        _log.info("Clearing user placements...")
         self.db.placements.delete_many({"user": user})
         self.reset_cache()
-        _log.info("User placements cleared.")
         self.lock.release()
 
 
