@@ -273,9 +273,20 @@ onwheel = (event) => {
 	}
 };
 
+const movementKeys = ["w", "a", "s", "d"];
+const paintKeys = ["arrowup", "arrowleft", "arrowdown", "arrowright"];
 onkeydown = (event) => {
-    if (event.key == "Enter") {
+    const key = event.key.toLowerCase();
+    if (key == "enter") {
         onPlace();
+    } else if (movementKeys.includes(key)) {
+        const i = movementKeys.indexOf(key);
+        const dir = (i & 2) ? -1:1;
+        moveCanvas((i & 1)*dir*currentZoomAmount, (i & 1 ^ 1)*dir*currentZoomAmount);
+    } else if (paintKeys.includes(key)) {
+        const i = paintKeys.indexOf(key);
+        const dir = (i & 2) ? 1:-1;
+        setColor(Math.max(0, Math.min(colors.length, currentlySelectedColor + dir * ((i & 1) ? 1:4))));
     }
 };
 
