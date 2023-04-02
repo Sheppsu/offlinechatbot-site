@@ -319,6 +319,8 @@ class Server:
             return "INVALID"
         if user.banned:
             return
+        if user.can_mod:
+            return "FORBIDDEN"
         user.banned = True
         await self.loop.run_in_executor(self.executor, user.save)
         for ws in self.get_same_users(user.id):
