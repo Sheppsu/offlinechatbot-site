@@ -205,6 +205,7 @@ class Server:
             "CLEARUSER": self.handle_clear_user,
         }
         self.last_place = None
+        self.broadcast_lock = asyncio.Lock()
 
     async def send_canvas_info(self, ws):
         """event loop safe"""
@@ -225,11 +226,13 @@ class Server:
     async def send_all(self, message, exclude=None):
         if exclude is None:
             exclude = []
+        await self.broadcast_lock.acquire()
         await self.loop.run_in_executor(
             self.executor, websockets.broadcast, 
             filter(lambda ws: ws.id not in exclude, self.connections.values()) \
                 if len(exclude) > 0 else self.connections.values(),
             message)
+        self.broadcast_lock.release()
 
     def get_same_users(self, user_id):
         """event loop safe"""
