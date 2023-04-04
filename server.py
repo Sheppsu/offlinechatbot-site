@@ -391,7 +391,9 @@ class Server:
         except Exception as exc:
             _log.exception("Error when handling websocket", exc_info=exc)
         finally:
+            await self.broadcast_lock.acquire()
             del self.connections[ws.id]
+            self.broadcast_lock.release()
 
     async def run(self):
         async with websockets.serve(self.handler, os.getenv("HOST"), os.getenv("PORT")):
