@@ -341,7 +341,9 @@ class Server:
             self.cooldown = int(args[0])
         except ValueError:
             return "INVALID"
-        await self.send_all(f"COOLDOWNCHANGE {self.cooldown}")
+        for ws in self.connections.values():
+            if (now := time()) - ws.user.last_placement < self.cooldown:
+                await self.send_all(f"COOLDOWN {ws.user.last_placement + self.cooldown}")
 
     async def handle_clear_user(self, ws, args):
         if not ws.user.is_authenticated or not ws.user.can_clear_user:
@@ -373,7 +375,9 @@ class Server:
         return await ws.send("INVALID")
 
     async def handler(self, ws):
+        await self.broadcast_lock.acquire()
         self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
+        await self.broadcast_lock.release()
         _log.info(f"Opened connection with {ws.id}")
         await self.send_canvas_info(ws)
         try:
@@ -384,6 +388,8 @@ class Server:
                 await self.handle_command(ws, command)
         except websockets.ConnectionClosed:
             _log.info(f"Closed connection with {ws.id}")
+        except Exception as exc:
+            _log.exception("Error when handling websocket", exc_info=exc)
         finally:
             del self.connections[ws.id]
 
