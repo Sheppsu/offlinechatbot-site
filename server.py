@@ -377,7 +377,7 @@ class Server:
     async def handler(self, ws):
         await self.broadcast_lock.acquire()
         self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
-        await self.broadcast_lock.release()
+        self.broadcast_lock.release()
         _log.info(f"Opened connection with {ws.id}")
         await self.send_canvas_info(ws)
         try:
