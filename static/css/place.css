@@ -10,6 +10,9 @@
     --picking-color: #cccccc;
     --main-color1: #ff8b00;
     --main-color1-hover: #dd6b00;
+	
+	--canvas-width: 750px;
+	--canvas-height: 750px;
 }
 
 body {
@@ -47,19 +50,15 @@ input[type=number] {
 }
 
 #canvas-zoom-container {
-    width: 500px;
-    height: 500px;
+    width: var(--canvas-width);
+    height: var(--canvas-height);
     transform: scale(1, 1);
 }
 
 #canvas-move-container {
-    width: 500px;
-    height: 500px;
+    width: var(--canvas-width);
+    height: var(--canvas-height);
     transform: translate(0px, 0px);
-}
-
-#canvas {
-
 }
 
 .gui {
@@ -170,7 +169,7 @@ input[type=number] {
     width: 0px;
     height: 0px;
 
-    border-width: 2px;
+    border-width: 0px;
     border-radius: 0px;
     background-color: transparent;
 }

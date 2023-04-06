@@ -28,6 +28,9 @@ formatter = logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s")
 ch.setFormatter(formatter)
 _log.addHandler(ch)
 
+CANVAS_WIDTH = 750
+CANVAS_HEIGHT = 750
+
 
 class User:
     is_authenticated = True
@@ -132,12 +135,12 @@ class Canvas:
             "color": {"$last": "$color"}
         }}])
         canvas_info = sorted(map(lambda p: (
-            p["_id"][0] + p["_id"][1] * 500,
+            p["_id"][0] + p["_id"][1] * CANVAS_WIDTH,
             p["user"],
             p["color"],
         ), query), key=lambda item: item[0])
-        self.canvas_cache = bytearray(250000)
-        users = ["" for _ in range(250000)]  # TODO: look into using numpy
+        self.canvas_cache = bytearray(CANVAS_WIDTH*CANVAS_HEIGHT)
+        users = ["" for _ in range(CANVAS_WIDTH*CANVAS_HEIGHT)]  # TODO: look into using numpy
         for item in canvas_info:
             if item[0] >= len(users):
                 continue
@@ -275,10 +278,10 @@ class Server:
             coords = tuple(map(int, args))
         except ValueError:
             return "INVALID"
-        if not all(map(lambda c: 0 <= c <= 499, coords)):
-            return "INVALID"
         x1, y1, x2, y2 = coords
         if x2 - x1 < 0 or y2 - y1 < 0:
+            return "INVALID"
+        if not (0 <= x1 < CANVAS_WIDTH and 0 <= x2 < CANVAS_WIDTH) or not (0 <= y1 < CANVAS_HEIGHT and 0 <= y2 < CANVAS_HEIGHT):
             return "INVALID"
         await self.loop.run_in_executor(self.executor, self.canvas.clear_canvas, x1, y1, x2, y2)
         print(f"{ws.user.name} cleared from ({x1}, {y1}) to ({x2}, {y2})")
@@ -295,7 +298,7 @@ class Server:
             x, y, c = tuple(map(int, args))
         except ValueError:
             return "INVALID"
-        if c > 39 or x < 0 or x > 499 or y < 0 or y > 499:
+        if c > 39 or not 0 < x < CANVAS_WIDTH or not 0 < y < CANVAS_HEIGHT:
             return "INVALID"
         last_placement = await self.loop.run_in_executor(self.executor, self.canvas.get_last_pixel, x, y)
         if last_placement and last_placement["user"] == ws.user.name and last_placement["color"] == c:
@@ -386,12 +389,13 @@ class Server:
                 if command is None:
                     continue
                 await self.handle_command(ws, command)
-        except websockets.ConnectionClosed:
-            _log.info(f"Closed connection with {ws.id}")
+        except (websockets.ConnectionClosed, websockets.ConnectionClosedOK):
+            pass
         except Exception as exc:
             _log.exception("Error when handling websocket", exc_info=exc)
         finally:
             await self.broadcast_lock.acquire()
+            _log.info(f"Closed connection with {ws.id}")
             del self.connections[ws.id]
             self.broadcast_lock.release()
 

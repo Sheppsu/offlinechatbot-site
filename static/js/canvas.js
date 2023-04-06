@@ -46,6 +46,9 @@ const cooldownInput = document.getElementById("cooldown-input");
 const errorBox = document.getElementById("error-container");
 const errorLabel = document.getElementById("error-label");
 
+const canvasWidth = 750;
+const canvasHeight = 750;
+
 // states
 
 var ws = null;
@@ -72,14 +75,14 @@ function loadCanvas(data) {
         pixels[index+2] = color[2];
         pixels[index+3] = 255;
     }
-    const imageData = new ImageData(pixels, 500, 500);
+    const imageData = new ImageData(pixels, canvasWidth, canvasHeight);
     ctx.putImageData(imageData, 0, 0);
 }
 
 function placePixel(user, x, y, c) {
     ctx.fillStyle = hexColors[c];
     ctx.fillRect(x, y, 1, 1);
-    userList[x + 500 * y] = user;
+    userList[x + canvasWidth * y] = user;
     updatePlaceOutline();
 }
 
@@ -91,10 +94,10 @@ function clearCanvas(x1, y1, x2, y2) {
 function getPlacePos(canvasRect = null) {
     const containerRect = canvasContainer.getBoundingClientRect();
     if (canvasRect === null) {
-        canvasRect = zoomDiv.getBoundingClientRect();
+        canvasRect = canvas.getBoundingClientRect();
     }
-    const x = 500 * ((containerRect.left + containerRect.right) / 2 - canvasRect.left) / canvasRect.width;
-    const y = 500 * ((containerRect.top + containerRect.bottom) / 2 - canvasRect.top) / canvasRect.height;
+    const x = canvasWidth * ((containerRect.left + containerRect.right) / 2 - canvasRect.left) / canvasRect.width;
+    const y = canvasHeight * ((containerRect.top + containerRect.bottom) / 2 - canvasRect.top) / canvasRect.height;
     return [x, y];
 }
 
@@ -139,14 +142,14 @@ function updatePlaceOutline() {
     const placeY = Math.round(placePos[1]);
     if (!placeOutline.hasAttribute("hidden")) {
         const canvasRect = canvas.getBoundingClientRect();
-        const x = canvasRect.left + placeX * currentZoomAmount - (currentZoomAmount/8);
-        const y = canvasRect.top + placeY * currentZoomAmount - (currentZoomAmount/8);
+        const x = canvasRect.left + (placeX + placeX/(75*32)) * currentZoomAmount - currentZoomAmount/8;
+        const y = canvasRect.top + (placeY + placeY/(75*32)) * currentZoomAmount - currentZoomAmount/8;
         placeOutline.style.margin = ""+y+"px 0 0 "+x+"px";
         placeOutline.style.width = currentZoomAmount+"px";
         placeOutline.style.height = currentZoomAmount+"px";
         placeOutline.style.borderWidth = (currentZoomAmount/8)+"px";
     }
-    const user = userList[placeX+placeY*500];
+    const user = userList[placeX+placeY*canvasWidth];
     if (!(user === undefined)) {userLabel.innerHTML = "User: "+user;}
 }
 
@@ -322,8 +325,11 @@ if (clearButton) {
         if (!isAuthenticated) {return;}
         const pos = getClearPos();
         if (pos[2]-pos[0] < 0 || pos[3]-pos[1] < 0) {return;}
-        for (const value of pos) {
-            if (!(0 <= value || value <= 499)) {return;}
+        for (const value of [pos[0], pos[2]]) {
+            if (!(0 <= value || value <= canvasWidth)) {return;}
+        }
+		for (const value of [pos[1], pos[3]]) {
+            if (!(0 <= value || value <= canvasHeight)) {return;}
         }
         ws.send("CLEAR "+pos[0]+" "+pos[1]+" "+pos[2]+" "+pos[3]);
         resetClearPos();
@@ -448,5 +454,5 @@ function connect() {
 // initialization
 
 setZoom(document.getElementById("zoom-1x"), 1);
-setTranslate(window.innerWidth/2-250, window.innerHeight/2-250);
+setTranslate(window.innerWidth/2-canvasWidth/2, window.innerHeight/2-canvasHeight/2);
 connect();
