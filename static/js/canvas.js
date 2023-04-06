@@ -142,8 +142,8 @@ function updatePlaceOutline() {
     const placeY = Math.round(placePos[1]);
     if (!placeOutline.hasAttribute("hidden")) {
         const canvasRect = canvas.getBoundingClientRect();
-        const x = canvasRect.left + (placeX + placeX/(75*32)) * currentZoomAmount - currentZoomAmount/8;
-        const y = canvasRect.top + (placeY + placeY/(75*32)) * currentZoomAmount - currentZoomAmount/8;
+        const x = canvasRect.left + placeX * currentZoomAmount - currentZoomAmount/8;
+        const y = canvasRect.top + placeY * currentZoomAmount - currentZoomAmount/8;
         placeOutline.style.margin = ""+y+"px 0 0 "+x+"px";
         placeOutline.style.width = currentZoomAmount+"px";
         placeOutline.style.height = currentZoomAmount+"px";
