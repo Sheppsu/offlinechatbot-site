@@ -87,10 +87,11 @@ class AnonymousUser:
 
 
 class WebsocketWrapper:
-    def __init__(self, ws, user: "USER_TYPE"):
+    def __init__(self, ws, user: "USER_TYPE", broadcast_lock):
         self.ws = ws
         self.user: USER_TYPE = user
         self.last_message = ""
+        self.broadcast_lock = broadcast_lock
 
     def __getattr__(self, item):
         return getattr(self.ws, item)
@@ -98,7 +99,9 @@ class WebsocketWrapper:
     async def send(self, msg):
         if type(msg) == str and msg != "PONG" and len(msg) < 1000:
             _log.info(f"Sending to {self.ws.id}: {msg}")
+        await self.broadcast_lock.acquire()
         await self.ws.send(msg)
+        self.broadcast_lock.release()
         
     async def recv(self, do_check=False):
         msg = await self.ws.recv()
@@ -379,7 +382,7 @@ class Server:
 
     async def handler(self, ws):
         await self.broadcast_lock.acquire()
-        self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
+        self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser(), self.broadcast_lock))
         self.broadcast_lock.release()
         _log.info(f"Opened connection with {ws.id}")
         await self.send_canvas_info(ws)
