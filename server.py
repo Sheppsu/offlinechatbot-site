@@ -97,10 +97,14 @@ class WebsocketWrapper:
         return getattr(self.ws, item)
 
     async def send(self, msg):
+        await self.broadcast_lock.acquire()
         if type(msg) == str and msg != "PONG" and len(msg) < 1000:
             _log.info(f"Sending to {self.ws.id}: {msg}")
-        await self.broadcast_lock.acquire()
-        await self.ws.send(msg)
+        try:
+            await self.ws.send(msg)
+        except Exception as exc:
+            self.broadcast_lock.release()
+            raise exc
         self.broadcast_lock.release()
         
     async def recv(self, do_check=False):
@@ -233,11 +237,15 @@ class Server:
         if exclude is None:
             exclude = []
         await self.broadcast_lock.acquire()
-        await self.loop.run_in_executor(
-            self.executor, websockets.broadcast, 
-            filter(lambda ws: ws.id not in exclude, self.connections.values()) \
-                if len(exclude) > 0 else self.connections.values(),
-            message)
+        try:
+            await self.loop.run_in_executor(
+                self.executor, websockets.broadcast, 
+                filter(lambda ws: ws.id not in exclude, self.connections.values()) \
+                    if len(exclude) > 0 else self.connections.values(),
+                message)
+        except Exception as exc:
+            self.broadcast_lock.release()
+            raise exc
         self.broadcast_lock.release()
 
     def get_same_users(self, user_id):
