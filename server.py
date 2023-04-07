@@ -95,8 +95,8 @@ class WebsocketWrapper:
     def __getattr__(self, item):
         return getattr(self.ws, item)
 
-    async def send(self, msg):
-        if type(msg) == str and msg != "PONG" and len(msg) < 1000:
+    async def send(self, msg, log=True):
+        if log and type(msg) == str and msg != "PONG" and len(msg) < 1000:
             _log.info(f"Sending to {self.ws.id}: {msg}")
 
         await self.ws.send(msg)
@@ -230,8 +230,10 @@ class Server:
         if exclude is None:
             exclude = []
 
+        _log.info(f"Sending {message} to all")
+
         for ws in tuple(filter(lambda ws: ws.id not in exclude, self.connections.values())):
-            await ws.send(message)
+            await ws.send(message, log=False)
 
     def get_same_users(self, user_id):
         """event loop safe"""
@@ -376,8 +378,8 @@ class Server:
     async def handler(self, ws):
         self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
         _log.info(f"Opened connection with {ws.id}")
-        await self.send_canvas_info(ws)
         try:
+            await self.send_canvas_info(ws)
             while True:
                 command = await ws.recv(do_check=ws.user.is_authenticated and self.last_place == ws.user.id)
                 if command is None:
