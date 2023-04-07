@@ -87,25 +87,19 @@ class AnonymousUser:
 
 
 class WebsocketWrapper:
-    def __init__(self, ws, user: "USER_TYPE", broadcast_lock):
+    def __init__(self, ws, user: "USER_TYPE"):
         self.ws = ws
         self.user: USER_TYPE = user
         self.last_message = ""
-        self.broadcast_lock = broadcast_lock
 
     def __getattr__(self, item):
         return getattr(self.ws, item)
 
     async def send(self, msg):
-        await self.broadcast_lock.acquire()
         if type(msg) == str and msg != "PONG" and len(msg) < 1000:
             _log.info(f"Sending to {self.ws.id}: {msg}")
-        try:
-            await self.ws.send(msg)
-        except Exception as exc:
-            self.broadcast_lock.release()
-            raise exc
-        self.broadcast_lock.release()
+
+        await self.ws.send(msg)
         
     async def recv(self, do_check=False):
         msg = await self.ws.recv()
@@ -215,7 +209,6 @@ class Server:
             "CLEARUSER": self.handle_clear_user,
         }
         self.last_place = None
-        self.broadcast_lock = asyncio.Lock()
 
     async def send_canvas_info(self, ws):
         """event loop safe"""
@@ -236,23 +229,15 @@ class Server:
     async def send_all(self, message, exclude=None):
         if exclude is None:
             exclude = []
-        await self.broadcast_lock.acquire()
-        try:
-            await self.loop.run_in_executor(
-                self.executor, websockets.broadcast, 
-                filter(lambda ws: ws.id not in exclude, self.connections.values()) \
-                    if len(exclude) > 0 else self.connections.values(),
-                message)
-        except Exception as exc:
-            self.broadcast_lock.release()
-            raise exc
-        self.broadcast_lock.release()
+
+        for ws in tuple(filter(lambda ws: ws.id not in exclude, self.connections.values())):
+            await ws.send(message)
 
     def get_same_users(self, user_id):
         """event loop safe"""
-        return filter(lambda other_ws: other_ws.user.is_authenticated and
+        return tuple(filter(lambda other_ws: other_ws.user.is_authenticated and
                                        other_ws.user.id == user_id,
-                      self.connections.values())
+                      self.connections.values()))
 
     # Events
     # All events are event loop safe
@@ -355,7 +340,7 @@ class Server:
             self.cooldown = int(args[0])
         except ValueError:
             return "INVALID"
-        for ws in self.connections.values():
+        for ws in tuple(self.connections.values()):
             if (now := time()) - ws.user.last_placement < self.cooldown:
                 await self.send_all(f"COOLDOWN {ws.user.last_placement + self.cooldown}")
 
@@ -368,7 +353,7 @@ class Server:
         if self.canvas.canvas_cache is None:
             # Not using websockets.broadcast because it does not use fragmenting and this is sizeable data
             canvas, users = await self.loop.run_in_executor(self.executor, self.canvas.get_canvas_info)
-            for ws in self.connections.values():
+            for ws in tuple(self.connections.values()):
                 await ws.send(canvas)
                 await ws.send(users)
 
@@ -389,9 +374,7 @@ class Server:
         return await ws.send("INVALID")
 
     async def handler(self, ws):
-        await self.broadcast_lock.acquire()
-        self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser(), self.broadcast_lock))
-        self.broadcast_lock.release()
+        self.connections[ws.id] = (ws := WebsocketWrapper(ws, AnonymousUser()))
         _log.info(f"Opened connection with {ws.id}")
         await self.send_canvas_info(ws)
         try:
@@ -405,10 +388,8 @@ class Server:
         except Exception as exc:
             _log.exception("Error when handling websocket", exc_info=exc)
         finally:
-            await self.broadcast_lock.acquire()
             _log.info(f"Closed connection with {ws.id}")
             del self.connections[ws.id]
-            self.broadcast_lock.release()
 
     async def run(self):
         async with websockets.serve(self.handler, os.getenv("HOST"), os.getenv("PORT")):
