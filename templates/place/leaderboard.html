@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Place{% endblock title %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/place.css' %}">
+{% endblock head %}
+{% block body %}
+<div class="content-container" style="background-color: transparent;border-style: none;">
+    {% for user in users %}
+    <div class="leaderboard-div">
+        <h1 class="label" style="margin-top: 10px;">
+            {{ forloop.counter }}. {{ user.twitch_name }}: {{ user.blocks_placed }}
+        </h1>
+    </div>
+    {% endfor %}
+</div>
+{% endblock body %}
