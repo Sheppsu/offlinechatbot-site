@@ -318,7 +318,10 @@ function onPlace(event = null) {
     ws.send("PLACE "+Math.round(pos[0])+" "+Math.round(pos[1])+" "+currentlySelectedColor);
 }
 
-placeButton.onclick = onPlace;
+if (placeButton) {
+	placeButton.onclick = onPlace;
+}
+
 
 if (clearButton) {
     clearButton.onclick = (event) => {
