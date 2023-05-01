@@ -200,13 +200,13 @@ class Server:
         self.connections = {}
         self.user_lock = threading.Lock()
         self.commands = {
-            "PLACE": self.handle_place,
-            "AUTH": self.handle_authentication,
-            "CLEAR": self.handle_clear,
-            "BAN": self.handle_ban,
+            # "PLACE": self.handle_place,
+            # "AUTH": self.handle_authentication,
+            # "CLEAR": self.handle_clear,
+            # "BAN": self.handle_ban,
             "PING": self.handle_ping,
-            "SETCOOLDOWN": self.handle_set_cooldown,
-            "CLEARUSER": self.handle_clear_user,
+            # "SETCOOLDOWN": self.handle_set_cooldown,
+            # "CLEARUSER": self.handle_clear_user,
         }
         self.last_place = None
 

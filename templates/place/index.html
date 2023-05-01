@@ -31,110 +31,11 @@
     </table>
 </div>
 
-{% if is_authenticated and not is_banned %}
-<div id="color-picker" class="gui">
-    <table id="color-table">
-        <tr class="color-row">
-            <td><div id="color-0" class="color-option"></div></td>
-            <td><div id="color-1" class="color-option"></div></td>
-            <td><div id="color-2" class="color-option"></div></td>
-            <td><div id="color-3" class="color-option"></div></td>
-        </tr>
-        <tr class="color-row">
-            <td><div id="color-4" class="color-option"></div></td>
-            <td><div id="color-5" class="color-option"></div></td>
-            <td><div id="color-6" class="color-option"></div></td>
-            <td><div id="color-7" class="color-option"></div></td>
-        </tr>
-        <tr class="color-row">
-            <td><div id="color-8" class="color-option"></div></td>
-            <td><div id="color-9" class="color-option"></div></td>
-            <td><div id="color-10" class="color-option"></div></td>
-            <td><div id="color-11" class="color-option"></div></td>
-        </tr>
-        <tr class="color-row">
-            <td><div id="color-12" class="color-option"></div></td>
-            <td><div id="color-13" class="color-option"></div></td>
-            <td><div id="color-14" class="color-option"></div></td>
-            <td><div id="color-15" class="color-option"></div></td>
-        </tr>
-        <tr class="color-row">
-            <td><div id="color-16" class="color-option"></div></td>
-            <td><div id="color-17" class="color-option"></div></td>
-            <td><div id="color-18" class="color-option"></div></td>
-            <td><div id="color-19" class="color-option"></div></td>
-        </tr>
-        <tr class="color-row">
-            <td><div id="color-20" class="color-option"></div></td>
-            <td><div id="color-21" class="color-option"></div></td>
-            <td><div id="color-22" class="color-option"></div></td>
-            <td><div id="color-23" class="color-option"></div></td>
-        </tr>
-        <tr class="color-row">
-            <td><div id="color-24" class="color-option"></div></td>
-            <td><div id="color-25" class="color-option"></div></td>
-            <td><div id="color-26" class="color-option"></div></td>
-            <td><div id="color-27" class="color-option"></div></td>
-        </tr>
-        <tr class="color-row">
-            <td><div id="color-28" class="color-option"></div></td>
-            <td><div id="color-29" class="color-option"></div></td>
-            <td><div id="color-30" class="color-option"></div></td>
-            <td><div id="color-31" class="color-option"></div></td>
-        </tr>
-        <tr class="color-row">
-            <td><div id="color-32" class="color-option"></div></td>
-            <td><div id="color-33" class="color-option"></div></td>
-            <td><div id="color-34" class="color-option"></div></td>
-            <td><div id="color-35" class="color-option"></div></td>
-        </tr>
-		<tr class="color-row">
-            <td><div id="color-36" class="color-option"></div></td>
-            <td><div id="color-37" class="color-option"></div></td>
-            <td><div id="color-38" class="color-option"></div></td>
-            <td><div id="color-39" class="color-option"></div></td>
-        </tr>
-    </table>
-</div>
-{% endif %}
-
-<div id="place-pos" class="gui">
-    <h1 id="place-pos-label" class="black label"></h1>
-</div>
-
-<div id="place-button" class="gui {% if is_banned %}place-button-cooldown{% endif %}">
-    <h1 id="place-label" class="label" style="margin-top:10px;">
-        {% if is_banned %}Banned{% elif is_authenticated %}Place{% else %}Login to place{% endif %}
-    </h1>
-</div>
-
-{% if is_admin or is_mod %}
-<div id="control-panel" class="gui">
-    <div id="clear-button" class="contained gui">
-        <h1 class="black label" style="font-size: 100%; margin-top: 2px;">Clear</h1>
-    </div>
-    <input type="number" class="contained gui clear-input" id="clear-x1" placeholder="X1">
-    <input type="number" class="contained gui clear-input" id="clear-y1" placeholder="Y1">
-    <input type="number" class="contained gui clear-input" id="clear-x2" placeholder="X2">
-    <input type="number" class="contained gui clear-input" id="clear-y2" placeholder="Y2">
-    <div id="ban-button" class="contained gui">
-        <h1 class="black label" style="font-size: 100%; margin-top: 2px;">Ban</h1>
-    </div>
-    <input type="text" class="contained gui" id="ban-input" placeholder="username">
-    <div id="cooldown-button" class="contained gui">
-        <h1 class="black label" style="font-size: 100%; margin-top: 2px;">Set cooldown</h1>
-    </div>
-    <input type="number" class="contained gui" id="cooldown-input" placeholder="cooldown">
-</div>
-{% endif %}
-
-<div id="place-outline" class="gui" hidden></div>
-
 <div id="user-label-container" class="gui"><h1 id="user-label" class="black label">User:</h1></div>
 
 <div id="error-container" class="gui" hidden><h1 id="error-label" class="label"></h1></div>
 
-<h1 id="end-date" style="position:absolute;left:0;top:0;margin-left:10px;margin-top:calc(100vh - 50px)">Ends May 1st</h1>
+<h1 id="end-date" style="position:absolute;left:0;top:0;margin-left:10px;margin-top:calc(100vh - 50px)">Ended</h1>
 
 <script src="{% static 'js/canvas.js' %}"></script>
 {% endblock body %}
