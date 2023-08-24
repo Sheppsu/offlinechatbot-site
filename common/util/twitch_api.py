@@ -3,7 +3,7 @@ from django.conf import settings
 import requests
 
 
-REDIRECT_URI = "http://localhost:8000/login" if settings.DEBUG else "https://bot.sheppsu.me/login"
+REDIRECT_URI = "http://localhost:8001/login" if settings.DEBUG else "https://bot.sheppsu.me/login"
 
 
 def get_auth_url(state=""):

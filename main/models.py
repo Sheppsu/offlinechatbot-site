@@ -34,6 +34,9 @@ class User(AbstractBaseUser):
     twitch_id = models.PositiveIntegerField(unique=True, editable=False)
     twitch_name = models.CharField(max_length=25, unique=True)
 
+    osu_id = models.PositiveIntegerField(null=True)
+    osu_username = models.CharField(max_length=45, null=True)
+
     banned = models.BooleanField(default=False)
     type = models.PositiveSmallIntegerField(choices=UserType.choices, default=UserType.USER)
 

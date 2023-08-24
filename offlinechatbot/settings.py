@@ -13,9 +13,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from dotenv import load_dotenv
 load_dotenv()
 
+from osu import AuthHandler, Scope, Client
 from pathlib import Path
 import os
 import mimetypes
+
 
 mimetypes.add_type("text/css", ".css", True)
 
@@ -30,11 +32,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = bool(os.getenv("DEBUG"))
 
 ALLOWED_HOSTS = [
     "bot.sheppsu.me",
-    "localhost",
+    "localhost"
 ]
 
 
@@ -127,10 +129,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "main.User"
 
-ADMINS = [
-    ("Sheppsu", "apc2005osu@gmail.com"),
-]
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -160,3 +158,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 TWITCH_CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
 TWITCH_CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
+
+OSU_CLIENT_ID = int(os.getenv("OSU_CLIENT_ID"))
+OSU_CLIENT_SECRET = os.getenv("OSU_CLIENT_SECRET")
+OSU_CLIENT_REDIRECT = os.getenv("OSU_CLIENT_REDIRECT")
+OSU_AUTH_URL = AuthHandler(OSU_CLIENT_ID, OSU_CLIENT_SECRET, OSU_CLIENT_REDIRECT, Scope.identify()).get_auth_url()
+OSU_CLIENT = Client.from_client_credentials(OSU_CLIENT_ID, OSU_CLIENT_SECRET, OSU_CLIENT_REDIRECT)
+
+BOT_DB_HOST = os.getenv("BOT_DB_HOST")
+BOT_DB_PORT = os.getenv("BOT_DB_PORT")
+BOT_DB_USER = os.getenv("BOT_DB_USER")
+BOT_DB_PASSWORD = os.getenv("BOT_DB_PASSWORD")
+BOT_DB_DATABASE = os.getenv("BOT_DB_DATABASE")
+BOT_DB = None
