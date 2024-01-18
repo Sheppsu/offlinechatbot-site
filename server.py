@@ -1,7 +1,6 @@
 import asyncio
 import django
 import websockets
-import pymongo
 import os
 from time import time
 import threading
@@ -16,7 +15,10 @@ os.environ["DJANGO_SETTINGS_MODULE"] = "offlinechatbot.settings"
 django.setup()
 
 from django.contrib.auth import get_user_model
+from django.db import connection
 from sesame.utils import get_user as _get_user
+
+from place.models import Placement
 
 
 UserModel = get_user_model()
@@ -38,6 +40,8 @@ class User:
     is_admin: bool
     can_mod: bool
     banned: bool
+
+    __slots__ = ("id", "name", "last_placement", "is_mod", "is_admin", "can_mod", "banned")
 
     def __init__(self, user: UserModel):
         self.id = user.id
@@ -114,7 +118,6 @@ USER_TYPE = Union[User, AnonymousUser]
 
 class Canvas:
     def __init__(self):
-        self.db: pymongo.MongoClient = pymongo.MongoClient(host=os.getenv("MONGO_URL")).place
         self.lock: threading.Lock = threading.Lock()
 
         self.canvas_cache = None
@@ -130,23 +133,28 @@ class Canvas:
         }
 
     def _update_cache(self):
-        query = self.db.placements.aggregate([{"$group": {
-            "_id": "$coordinate",
-            "user": {"$last": "$user"},
-            "color": {"$last": "$color"}
-        }}])
-        canvas_info = sorted(map(lambda p: (
-            p["_id"][0] + p["_id"][1] * CANVAS_WIDTH,
-            p["user"],
-            p["color"],
-        ), query), key=lambda item: item[0])
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT DISTINCT ON (x, y) (
+                    x,
+                    y,
+                    color,
+                    main_user.twitch_name
+                ) FROM place_placement
+                INNER JOIN main_user ON (main_user.id = place_placement.user_id)
+                """
+            )
+            placements = cursor.fetchall()
         self.canvas_cache = bytearray(CANVAS_WIDTH*CANVAS_HEIGHT)
-        users = ["" for _ in range(CANVAS_WIDTH*CANVAS_HEIGHT)]  # TODO: look into using numpy
-        for item in canvas_info:
-            if item[0] >= len(users):
+        users = ["" for _ in range(CANVAS_WIDTH*CANVAS_HEIGHT)]
+        for placement in placements:
+            i = placement[0] + placement[1] * 500
+            try:
+                users[i] = placement[3]
+                self.canvas_cache[i] = placement[2]
+            except IndexError:
                 continue
-            users[item[0]] = item[1]
-            self.canvas_cache[item[0]] = item[2]
         self.user_cache = " ".join(users)
 
     def reset_cache(self):
@@ -159,6 +167,8 @@ class Canvas:
             self._update_cache()
         self.lock.release()
         return self.canvas_cache, self.user_cache
+
+    # TODO: fix later (cuz no longer using mongodb)
 
     def get_last_pixel(self, x, y):
         self.lock.acquire()
