@@ -149,10 +149,11 @@ class Canvas:
         self.canvas_cache = bytearray(CANVAS_WIDTH*CANVAS_HEIGHT)
         users = ["" for _ in range(CANVAS_WIDTH*CANVAS_HEIGHT)]
         for placement in placements:
-            i = placement[0] + placement[1] * 500
+            placement = placement[0][1:-1].split(",")
+            i = int(placement[0]) + int(placement[1]) * 750
             try:
                 users[i] = placement[3]
-                self.canvas_cache[i] = placement[2]
+                self.canvas_cache[i] = int(placement[2])
             except IndexError:
                 continue
         self.user_cache = " ".join(users)
