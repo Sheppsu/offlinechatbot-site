@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Offline Chat osu! leaderboard{% endblock title %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/osu-leaderboard.css' %}">
+{% endblock head %}
+{% block body %}
+<div class="page-container">
+    <h1>Offline chat osu! leaderboard</h1>
+    <p><a href="/osuauth">Login with osu</a> to be on the leaderboard</p>
+    <p>Updates every ~10 minutes</p>
+    <div class="lb-container">
+        {% for i, user in users %}
+        <div class="entry-container">
+            <h1 style="text-align: center;">{{ i }}</h1>
+            <a href="https://osu.ppy.sh/u/{{ user.0 }}" target="_blank">{{ user.1 }}</a>
+            <p>#{{ user.2 }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock body %}

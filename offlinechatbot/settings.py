@@ -36,7 +36,8 @@ DEBUG = bool(int(os.getenv("DEBUG")))
 
 ALLOWED_HOSTS = [
     "bot.sheppsu.me",
-    "localhost"
+    "localhost",
+    "127.0.0.1"
 ]
 
 
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     "place.apps.PlaceConfig",
     "main.apps.MainConfig",
     "docs.apps.DocsConfig",
+    "osuapp.apps.OsuappConfig"
 ]
 
 MIDDLEWARE = [
