@@ -27,14 +27,13 @@ Scheduler.run_continuously = run_continuously
 
 def start_scheduler():
     scheduler = Scheduler()
-    scheduler.every(10).minute.do(update_osu_user_data).run()
+    scheduler.every(10).minutes.do(update_osu_user_data)
     scheduler.run_continuously()
 
 
 # jobs
 
 def update_osu_user_data():
-    print("aaaa")
     client = settings.OSU_CLIENT
     db = get_database()
     cursor = db.cursor()
