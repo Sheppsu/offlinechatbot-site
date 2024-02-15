@@ -13,7 +13,7 @@
         {% for i, user in users %}
         <div class="entry-container">
             <h1 style="text-align: center;">{{ i }}</h1>
-            <a href="https://osu.ppy.sh/u/{{ user.0 }}" target="_blank">{{ user.1 }}</a>
+            <p><a href="https://osu.ppy.sh/u/{{ user.0 }}" target="_blank">{{ user.1 }}</a> ({{ user.3 }})</p>
             <p>#{{ user.2 }}</p>
         </div>
         {% endfor %}

@@ -5,8 +5,9 @@ def index(req):
     db = get_database()
     cursor = db.cursor()
     cursor.execute(
-        "SELECT osu_user_data.osu_user_id, osu_data.osu_username, osu_user_data.global_rank FROM osu_user_data "
+        "SELECT osu_user_data.osu_user_id, osu_data.osu_username, osu_user_data.global_rank, userdata.username FROM osu_user_data "
         "INNER JOIN osu_data ON osu_user_data.osu_user_id = osu_data.osu_user_id "
+        "INNER JOIN userdata ON userdata.userid = osu_data.user_id "
         "WHERE verified = 1"
     )
     verified_users = sorted(cursor.fetchall(), key=lambda u: u[2])
