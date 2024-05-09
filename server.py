@@ -143,6 +143,7 @@ class Canvas:
                     main_user.twitch_name
                 ) FROM place_placement
                 INNER JOIN main_user ON (main_user.id = place_placement.user_id)
+                ORDER BY x, y, timestamp DESC
                 """
             )
             placements = cursor.fetchall()
