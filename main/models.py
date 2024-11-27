@@ -1,69 +1,114 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-from common.util import get_tokens, get_user
-
-import uuid
+from common.twitch_api import get_token, get_user
+from common.models import enum_field
 
 
-class UserType(models.TextChoices):
-    USER = 1
-    MODERATOR = 2
-    ADMIN = 3
+class UserPermissions(models.TextChoices):
+    MODERATOR = 1 << 0
+    ADMIN = 1 << 1
 
 
-class UserManager(BaseUserManager):
-    def create_user(self, code, type=UserType.USER):
-        access_token, refresh_token = get_tokens(code)
+@enum_field(UserPermissions, models.PositiveSmallIntegerField)
+class UserPermissionsField:
+    pass
+
+
+class UserManager(models.Manager):
+    def create_user(self, code, permissions: UserPermissions | int = 0):
+        access_token = get_token(code)
         twitch_user = get_user(access_token)
         try:
-            user = User.objects.get(twitch_id=twitch_user["id"])
-            user.refresh_token = refresh_token
+            user = User.objects.get(id=twitch_user["id"])
+            user.username = twitch_user["login"]
+            user.permissions = permissions
         except User.DoesNotExist:
-            user = User(twitch_id=twitch_user["id"], twitch_name=twitch_user["login"],
-                        refresh_token=refresh_token, type=type)
+            settings = UserSettings()
+            settings.save()
+            user = User(
+                id=twitch_user["id"],
+                username=twitch_user["login"],
+                settings=settings,
+                permissions=permissions
+            )
         user.save()
         return user
 
     def create_superuser(self, code):
-        return self.create_user(code, type=UserType.ADMIN)
+        return self.create_user(code, UserPermissions.ADMIN)
 
 
-class User(AbstractBaseUser):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    twitch_id = models.PositiveIntegerField(unique=True, editable=False)
-    twitch_name = models.CharField(max_length=25, unique=True)
+class UserSettings(models.Model):
+    auto_remove_afk = models.BooleanField(default=False)
+    can_receive_money = models.BooleanField(default=True)
 
-    osu_id = models.PositiveIntegerField(null=True)
-    osu_username = models.CharField(max_length=45, null=True)
 
-    banned = models.BooleanField(default=False)
-    type = models.PositiveSmallIntegerField(choices=UserType.choices, default=UserType.USER)
+class User(models.Model):
+    is_anonymous = False
+    is_authenticated = True
 
-    blocks_placed = models.PositiveIntegerField(default=0)
-    last_placement = models.FloatField(default=0)
+    id = models.PositiveIntegerField(primary_key=True, unique=True, db_index=True)
+    username = models.CharField(max_length=25)
+    permissions = UserPermissionsField(null=True, default=None)
 
-    refresh_token = models.CharField(max_length=64, default="")
+    money = models.BigIntegerField(default=0)
+    settings = models.ForeignKey(UserSettings, on_delete=models.PROTECT)
+    osu = models.ForeignKey("UserOsuData", on_delete=models.SET_NULL, null=True)
+    afk = models.ForeignKey("UserAfk", on_delete=models.SET_NULL, null=True)
+    timezone = models.ForeignKey("UserTimezone", on_delete=models.SET_NULL, null=True)
 
-    USERNAME_FIELD = "twitch_name"
+    USERNAME_FIELD = "id"
     EMAIL_FIELD = None
     REQUIRED_FIELDS = [
-        "twitch_id",
+        "username"
     ]
 
     objects = UserManager()
 
     def __str__(self):
-        return self.twitch_name
+        return self.username
 
-    @property
-    def can_mod(self):
-        return self.type >= int(UserType.MODERATOR)
 
-    @property
-    def is_mod(self):
-        return self.type == int(UserType.MODERATOR)
+class UserAfk(models.Model):
+    msg = models.CharField(max_length=512)
+    timestamp = models.DateTimeField()
 
-    @property
-    def is_admin(self):
-        return self.type == int(UserType.ADMIN)
+
+class UserReminder(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    channel = models.ForeignKey("Channel", on_delete=models.CASCADE)
+    remind_at = models.DateTimeField()
+    message = models.TextField()
+
+
+class UserTimezone(models.Model):
+    timezone = models.CharField(max_length=64)
+
+
+class UserOsuData(models.Model):
+    id = models.PositiveBigIntegerField(primary_key=True)
+    username = models.CharField(max_length=19)
+    global_rank = models.PositiveIntegerField()
+
+
+class AnimeCompareGame(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.SmallIntegerField()
+    is_finished = models.BooleanField()
+
+
+class Channel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_offline_only = models.BooleanField()
+
+
+class Command(models.Model):
+    name = models.CharField(max_length=32)
+    description = models.CharField(max_length=1024)
+    aliases = models.JSONField(default=list)
+
+
+class ChannelCommand(models.Model):
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
+    command = models.ForeignKey(Command, on_delete=models.CASCADE)
+    is_enabled = models.BooleanField()

@@ -1,4 +1,4 @@
-from common.util import render
+from common.views import render
 
 
 def overview(req):

@@ -34,11 +34,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.getenv("DEBUG")))
 
-ALLOWED_HOSTS = [
-    "bot.sheppsu.me",
-    "localhost",
-    "127.0.0.1"
-]
+ALLOWED_HOSTS = ["*"] if DEBUG else ["bot.sheppsu.me"]
 
 
 # Application definition
@@ -52,8 +48,7 @@ INSTALLED_APPS = [
 
     "place.apps.PlaceConfig",
     "main.apps.MainConfig",
-    "docs.apps.DocsConfig",
-    "osuapp.apps.OsuappConfig"
+    "docs.apps.DocsConfig"
 ]
 
 MIDDLEWARE = [

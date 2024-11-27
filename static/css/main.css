@@ -1,22 +1,20 @@
 :root {
-    --bg-color1: #333333;
-    --bg-color2: #333355;
-    --bg-color3: #222244;
-    --bg-color4: #222233;
+    --site-bg: #242F45;
+    --site-fg: #354666;
     --text-color: #ffffff;
-    --link-color: #999999;
-    --link-hover-color: #2222cc;
+    --link-color: #6DA8FF;
+    --link-hover-color: #3A89FF;
 }
 
 body {
-    padding: 0;
     margin: 0;
+    padding: 50px 0 0;
 
-    background-color: var(--bg-color1);
+    background-color: var(--site-bg);
 }
 
 h1, a, p {
-    font-family: Verdana;
+    font-family: Verdana, serif;
     color: var(--text-color);
 }
 
@@ -31,71 +29,71 @@ a:hover {
 
 hr {
     height: 2px;
-    color: black;
-    background-color: black;
+    background-color: white;
     border-width: 0;
 }
 
 .header {
-    width: 100%;
+    width: 100vw;
     height: 50px;
+    padding: 0 10px;
+
+    position: fixed;
+    top: 0;
+
+    display: flex;
+    flex-direction: row;
+
+    background-color: var(--site-fg);
+}
+
+.header-item {
+    height: 100%;
+    width: 150px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
     text-align: center;
-    table-layout: fixed;
-    background-color: var(--bg-color2);
-    user-select: none;
+
+    transition: background-color 0.2s;
 }
 
-.header-block {
-    width: 20%;
-    height: 100%;
-
-    padding: 0;
-    margin: 0;
+.header-link.header-marker {
+    color: #DDDDDD;
 }
 
-.header-block:hover {
-    background-color: var(--bg-color4);
+.header-item:hover {
+    cursor: pointer;
+
+    background-color: rgba(1, 1, 1, 0.2);
 }
 
-.header-marker {
-    background-color: var(--bg-color3);
-}
-
-.empty-header-block {
-    width: 20%;
-    height: 100%;
-}
-
-.header-link-container {
-    width: 100%;
-    height: 100%;
-    padding: 10px 0;
+.header-spacer {
+    flex-grow: 1;
 }
 
 .header-link {
-    text-decoration: none;
+    color: white;
 }
 
-.label {
-    font-size: 150%;
-    margin: 0;
+.header-link:hover {
+    color: white;
 }
 
 .content-container {
-    width: 90%;
+    width: calc(100% - 26px);
     max-width: 800px;
 
-    margin: auto;
-    margin-top: 50px;
+    margin: 20px auto auto;
     padding: 10px;
 
-    border-style: solid;
-    border-width: 3px;
+    border: solid 3px white;
     border-radius: 15px;
 
     text-align: center;
-    background-color: var(--bg-color2);
+    background-color: var(--site-fg);
 }
 
 .description {

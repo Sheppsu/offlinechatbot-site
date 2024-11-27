@@ -18,7 +18,7 @@ def get_auth_header(access_token):
     }
 
 
-def get_tokens(code):
+def get_token(code):
     params = {
         "client_id": settings.TWITCH_CLIENT_ID,
         "client_secret": settings.TWITCH_CLIENT_SECRET,
@@ -29,7 +29,7 @@ def get_tokens(code):
     resp = requests.post("https://id.twitch.tv/oauth2/token", params=params)
     resp.raise_for_status()
     data = resp.json()
-    return data["access_token"], data["refresh_token"]
+    return data["access_token"]
 
 
 def get_user(access_token):

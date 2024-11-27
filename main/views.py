@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model, login as _login, logout as _logo
 from django.conf import settings
 
 from sesame.utils import get_token as _get_token
-from common.util import render, get_database
+from common.views import render
 from common.constants import AUTH_BACKEND
 import traceback
 import requests
@@ -34,15 +34,15 @@ def login(req):
     return HttpResponseServerError()
 
 
-def set_osu_data_verified(user):
-    db = get_database()
-    cursor = db.cursor()
-    cursor.execute(f"SELECT osu_user_id FROM osu_data WHERE user_id = {user.twitch_id}")
-    if cursor.fetchone():
-        cursor.execute(f"UPDATE osu_data SET osu_user_id = {user.osu_id}, osu_username = '{user.osu_username}', verified = 1 WHERE user_id = {user.twitch_id!r}")
-    else:
-        cursor.execute(f"INSERT INTO osu_data (osu_user_id, osu_username, verified) VALUES ({user.osu_id}, '{user.osu_username}', 1)")
-    db.commit()
+# def set_osu_data_verified(user):
+#     db = get_database()
+#     cursor = db.cursor()
+#     cursor.execute(f"SELECT osu_user_id FROM osu_data WHERE user_id = {user.twitch_id}")
+#     if cursor.fetchone():
+#         cursor.execute(f"UPDATE osu_data SET osu_user_id = {user.osu_id}, osu_username = '{user.osu_username}', verified = 1 WHERE user_id = {user.twitch_id!r}")
+#     else:
+#         cursor.execute(f"INSERT INTO osu_data (osu_user_id, osu_username, verified) VALUES ({user.osu_id}, '{user.osu_username}', 1)")
+#     db.commit()
 
 
 def handle_osu_auth(req, code):

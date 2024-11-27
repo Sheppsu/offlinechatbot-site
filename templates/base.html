@@ -16,40 +16,24 @@
         <title>offlinechatbot - {% block title %}{% endblock title %}</title>
     </head>
     <body>
-        <table class="header">
-            <tr>
-                <td id="home" class="header-block">
-                    <a class="header-link" href="{% url 'index' %}"><div class="header-link-container">
-                        <h1 class="label">Home</h1>
-                    </div></a>
-                </td>
-                <td id="docs" class="header-block">
-                    <a class="header-link" href="{% url 'docs' %}"><div class="header-link-container">
-                        <h1 class="label">Docs</h1>
-                    </div></a>
-                </td>
-                <td id="place" class="header-block">
-                    <a class="header-link" href="{% url 'canvas' %}"><div class="header-link-container">
-                        <h1 class="label">Place</h1>
-                    </div></a>
-                </td>
-                <td class="empty-header-block"></td>
-                <td class="header-block">
-                    {% if is_authenticated %}
-                    <a class="header-link" href="{% url 'logout' %}?state={{ state }}"><div class="header-link-container">
-                        <h1 class="label">Logout</h1>
-                    </div></a>
-                    {% else %}
-                    <a class="header-link" href="{{ auth_url }}"><div class="header-link-container">
-                        <h1 class="label">Login</h1>
-                    </div></a>
-                    {% endif %}
-                </td>
-            </tr>
-        </table>
+        <div class="header">
+            <a class="header-link" href="{% url 'index' %}">
+                <div class="header-item">Home</div>
+            </a>
+            <a class="header-link" href="{% url 'docs' %}">
+                <div class="header-item">Docs</div>
+            </a>
+            <div class="header-spacer"></div>
+            {% if user.is_authenticated %}
+            <a class="header-link" href="{{ auth_url }}">
+                <div class="header-item">{{ user.username }}</div>
+            </a>
+            {% else %}
+            <a class="header-link" href="{{ auth_url }}">
+                <div class="header-item">Login (Twitch)</div>
+            </a>
+            {% endif %}
+        </div>
         {% block body %}{% endblock body %}
     </body>
-    <script>
-        document.getElementById("{% block headerid %}{% endblock headerid %}").classList.add("header-marker");
-    </script>
 </html>

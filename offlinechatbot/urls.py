@@ -18,6 +18,5 @@ from django.urls import path, include
 urlpatterns = [
     path("", include("main.urls")),
     path("place/", include("place.urls")),
-    path("docs/", include("docs.urls")),
-    path("osu/", include("osuapp.urls"))
+    path("docs/", include("docs.urls"))
 ]

@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 
-from common.util import render
+from common.views import render
 
 User = get_user_model()
 
