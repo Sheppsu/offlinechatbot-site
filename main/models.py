@@ -23,12 +23,9 @@ class UserManager(models.Manager):
             user.username = twitch_user["login"]
             user.permissions = permissions
         except User.DoesNotExist:
-            settings = UserSettings()
-            settings.save()
             user = User(
                 id=twitch_user["id"],
                 username=twitch_user["login"],
-                settings=settings,
                 permissions=permissions
             )
         user.save()
@@ -36,11 +33,6 @@ class UserManager(models.Manager):
 
     def create_superuser(self, code):
         return self.create_user(code, UserPermissions.ADMIN)
-
-
-class UserSettings(models.Model):
-    auto_remove_afk = models.BooleanField(default=False)
-    can_receive_money = models.BooleanField(default=True)
 
 
 class User(models.Model):
@@ -52,10 +44,10 @@ class User(models.Model):
     permissions = UserPermissionsField(null=True, default=None)
 
     money = models.BigIntegerField(default=0)
-    settings = models.ForeignKey(UserSettings, on_delete=models.PROTECT)
-    osu = models.ForeignKey("UserOsuData", on_delete=models.SET_NULL, null=True)
-    afk = models.ForeignKey("UserAfk", on_delete=models.SET_NULL, null=True)
-    timezone = models.ForeignKey("UserTimezone", on_delete=models.SET_NULL, null=True)
+
+    # settings
+    auto_remove_afk = models.BooleanField(default=False)
+    can_receive_money = models.BooleanField(default=True)
 
     USERNAME_FIELD = "id"
     EMAIL_FIELD = None
@@ -69,46 +61,72 @@ class User(models.Model):
         return self.username
 
 
+class UserChannel(models.Model):
+    user = models.OneToOneField("User", on_delete=models.CASCADE)
+    is_offline_only = models.BooleanField()
+
+
 class UserAfk(models.Model):
+    user = models.OneToOneField("User", on_delete=models.CASCADE)
     msg = models.CharField(max_length=512)
-    timestamp = models.DateTimeField()
-
-
-class UserReminder(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    channel = models.ForeignKey("Channel", on_delete=models.CASCADE)
-    remind_at = models.DateTimeField()
-    message = models.TextField()
+    timestamp = models.PositiveBigIntegerField()
 
 
 class UserTimezone(models.Model):
+    user = models.OneToOneField("User", on_delete=models.CASCADE)
     timezone = models.CharField(max_length=64)
 
 
 class UserOsuData(models.Model):
     id = models.PositiveBigIntegerField(primary_key=True)
     username = models.CharField(max_length=19)
+
     global_rank = models.PositiveIntegerField()
 
 
+class UserOsuConnection(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    osu = models.ForeignKey(UserOsuData, on_delete=models.CASCADE)
+    is_verified = models.BooleanField(default=False)
+
+
+class UserLastFM(models.Model):
+    user = models.OneToOneField("User", on_delete=models.CASCADE)
+    username = models.CharField(max_length=36)
+
+
+class UserPity(models.Model):
+    user = models.OneToOneField("User", on_delete=models.CASCADE)
+    four = models.PositiveSmallIntegerField(default=0)
+    five = models.PositiveSmallIntegerField(default=0)
+
+
+class UserReminder(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reminders")
+    channel = models.ForeignKey("UserChannel", on_delete=models.CASCADE)
+    remind_at = models.PositiveBigIntegerField()
+    message = models.CharField(max_length=512)
+
+
 class AnimeCompareGame(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ac_games")
     score = models.SmallIntegerField()
     is_finished = models.BooleanField()
-
-
-class Channel(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    is_offline_only = models.BooleanField()
 
 
 class Command(models.Model):
     name = models.CharField(max_length=32)
     description = models.CharField(max_length=1024)
     aliases = models.JSONField(default=list)
+    args = models.JSONField(default=list)
 
 
 class ChannelCommand(models.Model):
-    channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
+    channel = models.ForeignKey(UserChannel, on_delete=models.CASCADE, related_name="commands")
     command = models.ForeignKey(Command, on_delete=models.CASCADE)
     is_enabled = models.BooleanField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["channel", "command"], name="channel_command_unique")
+        ]
