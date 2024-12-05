@@ -41,7 +41,7 @@ hr {
 }
 
 .header {
-    width: 100vw;
+    width: calc(100vw - 20px);
     height: 50px;
     padding: 0 10px;
 
