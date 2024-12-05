@@ -16,22 +16,12 @@ load_dotenv()
 from osu import AuthHandler, Scope, Client
 from pathlib import Path
 import os
-import mimetypes
 
 
-mimetypes.add_type("text/css", ".css", True)
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.getenv("DEBUG")))
 
 ALLOWED_HOSTS = ["*"] if DEBUG else ["bot.sheppsu.me"]
@@ -61,7 +51,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -93,13 +82,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "offlinechatbot.wsgi.application"
 
 
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
-
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -112,6 +94,13 @@ DATABASES = {
         "HOST": os.getenv("PGHOST"),
         "PORT": os.getenv("PGPORT"),
     }
+}
+
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
 }
 
 
