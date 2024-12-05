@@ -2,6 +2,7 @@ from django.db import models
 
 from common.twitch_api import get_token, get_user
 from common.models import enum_field
+from common.serializer import SerializableModel
 
 
 class UserPermissions(models.TextChoices):
@@ -114,11 +115,14 @@ class AnimeCompareGame(models.Model):
     is_finished = models.BooleanField()
 
 
-class Command(models.Model):
+class Command(SerializableModel):
     name = models.CharField(max_length=32)
     description = models.CharField(max_length=1024)
     aliases = models.JSONField(default=list)
     args = models.JSONField(default=list)
+
+    class Serialization:
+        FIELDS = ["name", "description", "aliases", "args"]
 
 
 class ChannelCommand(models.Model):

@@ -1,36 +1,84 @@
-.command-container {
-    background-color: var(--bg-color3);
-    text-align: left;
-    border-radius: 10px;
-    margin: 10px 0;
+.full-content-container {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: row;
 }
 
-.command-label-container {
-    line-height: 15px;
-    padding: 0 5px;
-    border-style: solid;
-    border-radius: 10px;
+#navigation-bar {
+    width: 200px;
+    flex-shrink: 0;
+    height: calc(100% - 20px);
+    padding-top: 20px;
+    padding-left: 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    overflow-y: scroll;
+    scrollbar-color: var(--site-bg) var(--site-fg);
 }
 
-.command-label {
-    padding: 5px 5px;
-    font-size: 30px;
-    vertical-align: middle;
+.navigation-item {
     color: white;
 }
 
-.command-description-container {
-    display: none;
-    padding: 10px;
+.navigation-item:hover {
+    color: var(--link-hover-color);
+}
+
+#commands-container {
+    flex-grow: 1;
+    height: calc(100% - 40px);
+
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    overflow-y: scroll;
+    scrollbar-color: var(--site-bg) var(--site-fg);
+}
+
+.command {
+    display: flex;
+    flex-direction: column;
+}
+
+.command-info-container {
+    display: flex;
+    flex-direction: column;
+
+    padding-left: 10px;
+
+    border-left: solid 1px white;
+}
+
+.command-name {
+    margin: 0;
+
+    color: white;
+    font-size: 35px;
+    font-weight: 600;
+}
+
+.command-name:hover {
+    cursor: pointer;
+}
+
+.command-aliases {
+    margin-top: 0;
+    margin-bottom: 10px;
 }
 
 .command-description {
-    margin: 0;
+    margin-top: 10px;
+    margin-bottom: 15px;
 }
 
-.arrow {
-    width: 50px;
-    height: 50px;
-    padding: 8px 10px;
-    float: right;
+.command-usage {
+    margin: 5px 0;
 }

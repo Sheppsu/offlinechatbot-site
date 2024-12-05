@@ -48,7 +48,8 @@ INSTALLED_APPS = [
 
     "place.apps.PlaceConfig",
     "main.apps.MainConfig",
-    "docs.apps.DocsConfig"
+    "docs.apps.DocsConfig",
+    "api.apps.ApiConfig",
 ]
 
 MIDDLEWARE = [

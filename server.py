@@ -18,7 +18,8 @@ from django.contrib.auth import get_user_model
 from django.db import connection
 from sesame.utils import get_user as _get_user
 
-from place.models import Placement
+
+# TODO: eventually would be good to rewrite this file
 
 
 UserModel = get_user_model()
@@ -140,7 +141,7 @@ class Canvas:
                     x,
                     y,
                     color,
-                    main_user.twitch_name
+                    main_user.username
                 ) FROM place_placement
                 INNER JOIN main_user ON (main_user.id = place_placement.user_id)
                 ORDER BY x, y, timestamp DESC

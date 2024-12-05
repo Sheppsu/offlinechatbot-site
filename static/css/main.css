@@ -1,16 +1,23 @@
 :root {
-    --site-bg: #242F45;
-    --site-fg: #354666;
+    --site-bg: #151b28;
+    --site-fg: #273249;
     --text-color: #ffffff;
-    --link-color: #6DA8FF;
-    --link-hover-color: #3A89FF;
+    --link-color: #3CEEF6;
+    --link-hover-color: #0acad2;
 }
 
 body {
+    width: 100vw;
+    height: calc(100vh - 50px);
+
     margin: 0;
     padding: 50px 0 0;
 
+    display: flex;
+    flex-direction: column;
+
     background-color: var(--site-bg);
+    overflow: hidden;
 }
 
 h1, a, p {
