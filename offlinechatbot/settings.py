@@ -24,7 +24,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 DEBUG = bool(int(os.getenv("DEBUG")))
 
-ALLOWED_HOSTS = ["*"] if DEBUG else ["bot.sheppsu.me"]
+ALLOWED_HOSTS = ["*"] if DEBUG else ["bot.sheppsu.me", "127.0.0.1"]
 
 
 # Application definition
