@@ -16,13 +16,12 @@ class UserPermissionsField:
 
 
 class UserManager(models.Manager):
-    def create_user(self, code, permissions: UserPermissions | int = 0):
+    def create_user(self, code, permissions: UserPermissions | None = None):
         access_token = get_token(code)
         twitch_user = get_user(access_token)
         try:
             user = User.objects.get(id=twitch_user["id"])
             user.username = twitch_user["login"]
-            user.permissions = permissions
         except User.DoesNotExist:
             user = User(
                 id=twitch_user["id"],
@@ -81,8 +80,7 @@ class UserTimezone(models.Model):
 class UserOsuData(models.Model):
     id = models.PositiveBigIntegerField(primary_key=True)
     username = models.CharField(max_length=19)
-
-    global_rank = models.PositiveIntegerField()
+    global_rank = models.PositiveIntegerField(null=True)
 
 
 class UserOsuConnection(models.Model):
