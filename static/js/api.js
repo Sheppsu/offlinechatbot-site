@@ -23,20 +23,32 @@ function authHeader() {
 }
 
 export async function getCommands() {
-    const resp = await fetch("/api/commands/");
-    return await handleResp(resp);
+    return await handleResp(await fetch("/api/commands/"));
 }
 
 export async function updateSetting(channelId, setting, value) {
-    const resp = await fetch(
-        `/api/channels/${channelId}/settings/`, {
-            method: "PATCH",
-            body: JSON.stringify({
-                setting,
-                value
-            }),
-            headers: authHeader()
-        }
+    return await handleResp(
+        await fetch(
+            `/api/channels/${channelId}/settings/`, {
+                method: "PATCH",
+                body: JSON.stringify({
+                    setting,
+                    value
+                }),
+                headers: authHeader()
+            }
+        )
+    );
+}
+
+export async function toggleCommand(cmdId, enable) {
+    return await handleResp(
+        await fetch(
+            `/api/commands/${cmdId}/`, {
+                method: "PATCH",
+                body: JSON.stringify({enable}),
+                headers: authHeader()
+            }
+        )
     )
-    return await handleResp(resp);
 }

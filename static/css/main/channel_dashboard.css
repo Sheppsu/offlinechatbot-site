@@ -3,6 +3,11 @@
     --setting-on: #24F571;
 }
 
+.content-container {
+    width: calc(100% - 40px);
+    max-width: 1300px;
+}
+
 .setting {
     display: flex;
     flex-direction: row;
@@ -44,4 +49,23 @@
 
 .setting-toggle.off {
     background-color: var(--setting-off);
+}
+
+.command {
+    width: 280px;
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    border: white solid 2px;
+    border-radius: 10px;
+}
+
+.command-heading {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }

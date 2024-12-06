@@ -12,10 +12,26 @@
     <h1>Settings</h1>
     <hr />
     <div class="setting">
-        <div id="is_offline_only" class="setting-toggle" value="{{ channel.is_offline_only }}">
+        <div id="is_offline_only" class="setting-toggle channel-setting" value="{{ channel.is_offline_only }}">
             <div class="setting-toggle-inner"></div>
         </div>
         <p>Run in offline chat only</p>
+    </div>
+    <h1>Commands</h1>
+    <hr />
+    <div class="items-container center">
+        {% for command in channel.commands %}
+        <div class="command">
+            <div class="command-heading">
+                <div id="cmd-{{ command.id }}" class="setting-toggle command-setting" value="{{ command.is_enabled }}">
+                <div class="setting-toggle-inner"></div>
+                </div>
+                <p>{{ command.command.name }}</p>
+            </div>
+            <hr />
+            <p>{{ command.command.description }}</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 <script type="module">

@@ -17,7 +17,7 @@ body {
     flex-direction: column;
 
     background-color: var(--site-bg);
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 h1, a, p, div {

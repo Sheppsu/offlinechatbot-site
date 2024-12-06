@@ -58,10 +58,13 @@ def channel_dashboard(req, id: int):
     if not channel.can_access_settings(req.user.id):
         return HttpResponseForbidden()
 
+    serial_channel = channel.serialize(includes=["user", "commands__command"])
+    serial_channel["commands"] = sorted(serial_channel["commands"], key=lambda c: c["command"]["name"])
+
     return render(
         req,
         "main/channel_dashboard.html",
-        {"channel": channel.serialize(includes=["user", "commands__command"])}
+        {"channel": serial_channel}
     )
 
 

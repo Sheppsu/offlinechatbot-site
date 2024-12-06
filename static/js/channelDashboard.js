@@ -1,4 +1,4 @@
-import { updateSetting } from "./api.js";
+import { updateSetting, toggleCommand } from "./api.js";
 
 const channel = JSON.parse(document.getElementById("channel-data").innerText);
 
@@ -9,17 +9,38 @@ function updateSettingToggle(elm, value) {
 }
 
 let updateSettingTimeout = null;
+let updateCommandTimeout = {};
+
 function initSetting(setting) {
     updateSettingToggle(setting, setting.getAttribute("value") === "True")
 
-    setting.addEventListener("click", () => {
-        const newValue = setting.classList.contains("off")
-        updateSettingToggle(setting, newValue);
+    if (setting.classList.contains("channel-setting"))
+        setting.addEventListener("click", () => {
+            const newValue = setting.classList.contains("off");
+            updateSettingToggle(setting, newValue);
 
-        if (updateSettingTimeout !== null)
-            clearTimeout(updateSettingTimeout);
-        updateSettingTimeout = setTimeout(updateSetting, 1000, channel.id, setting.id, newValue);
-    });
+            if (updateSettingTimeout !== null)
+                clearTimeout(updateSettingTimeout);
+
+            updateSettingTimeout = setTimeout(() => {
+                updateSetting(channel.id, setting.id, newValue)
+                updateSettingTimeout = null;
+            }, 1000);
+        });
+    else
+        setting.addEventListener("click", () => {
+            const newValue = setting.classList.contains("off");
+            updateSettingToggle(setting, newValue);
+
+            const currentTimeout = updateCommandTimeout[setting.id];
+            if (currentTimeout !== undefined)
+                clearTimeout(currentTimeout)
+
+            updateCommandTimeout[setting.id] = setTimeout(() => {
+                toggleCommand(setting.id.substring(4), newValue);
+                updateCommandTimeout[setting.id] = undefined;
+            }, 1000);
+        });
 }
 
 export function initSettings() {

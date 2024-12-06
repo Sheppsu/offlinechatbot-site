@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 
-from main.models import Command, UserChannel
+from main.models import Command, UserChannel, ChannelCommand
 
 import socket
 import json
@@ -123,16 +123,35 @@ def update_channel_setting(req, channel: UserChannel, data):
     except (KeyError, AssertionError):
         return error("invalid data")
 
-    try:
-        setattr(channel, setting, value)
-        channel.save()
-    except KeyError:
-        return error("invalid setting name")
+    if setting not in UserChannel.Serialization.FIELDS or setting == "id":
+        return error("invalid setting")
+
+    setattr(channel, setting, value)
+    channel.save()
 
     communicator.put(channel.id)
 
     return success(None)
 
 
-def toggle_command(req):
-    pass
+@requires_data
+@requires_method("PATCH")
+def toggle_command(req, id, data):
+    command = ChannelCommand.objects.select_related("channel").filter(id=id).first()
+    if command is None:
+        return error("invalid command")
+
+    if not command.channel.can_access_settings(req.user.id):
+        return error("invalid permissions for this channel", status=403)
+
+    try:
+        enable = data["enable"]
+    except KeyError:
+        return error("invalid data")
+
+    command.is_enabled = enable
+    command.save()
+
+    communicator.put(command.channel.id)
+
+    return success(None)
