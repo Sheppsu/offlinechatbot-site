@@ -23,7 +23,7 @@ class BotCommunicator:
         self._queue.put(channel_id)
 
         if not self._running.is_set():
-            threading.Thread(target=self.run)
+            threading.Thread(target=self.run).start()
             self._running.wait()
 
         self._lock.release()
@@ -40,13 +40,16 @@ class BotCommunicator:
     def run(self):
         self._running.set()
 
-        while True:
-            channel_id = self._queue.get()
+        try:
+            while True:
+                channel_id = self._queue.get()
 
-            if channel_id == 0:
-                break
+                if channel_id == 0:
+                    break
 
-            self._refresh_channel_for_bot(channel_id)
+                self._refresh_channel_for_bot(channel_id)
+        except:
+            pass
 
         self._running.clear()
 
