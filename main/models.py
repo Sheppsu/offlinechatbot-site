@@ -70,6 +70,13 @@ class UserChannel(SerializableModel):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
     is_offline_only = models.BooleanField()
 
+    def can_access_settings(self, user_id: int):
+        """Accesses 'managers' o2m field"""
+        return (
+            self.user_id == user_id or
+            next((manager for manager in self.managers.all() if manager.user_id == user_id), None) is not None
+        )
+
     class Serialization:
         FIELDS = ["id", "is_offline_only"]
 

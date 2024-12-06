@@ -5,7 +5,7 @@ from django.conf import settings
 
 from common.views import render
 from common.constants import AUTH_BACKEND
-from .models import UserOsuConnection, UserOsuData, UserChannel
+from .models import UserOsuConnection, UserOsuData, UserChannel, UserChannelConnection
 
 from sesame.utils import get_token as _get_token
 from osu import Client, AuthHandler, Scope
@@ -36,12 +36,14 @@ def dashboard(req):
     if channel is not None:
         channel.user = req.user
 
+    connections = UserChannelConnection.objects.select_related("channel__user").filter(user_id=req.user.id)
+
     return render(
         req,
         'main/dashboard.html',
         {
             "connections": {"osu": osu},
-            "channels": [channel] if channel is not None else [],
+            "channels": ([channel] if channel is not None else []) + list((conn.channel for conn in connections)),
             "osu_auth_url": settings.OSU_AUTH_URL
         }
     )
@@ -49,9 +51,12 @@ def dashboard(req):
 
 @requires_login
 def channel_dashboard(req, id: int):
-    channel = UserChannel.objects.prefetch_related("commands__command").select_related("user").filter(id=id).first()
+    channel = UserChannel.objects.prefetch_related("commands__command", "managers").select_related("user").filter(id=id).first()
     if channel is None:
         return redirect("dashboard")
+
+    if not channel.can_access_settings(req.user.id):
+        return HttpResponseForbidden()
 
     return render(
         req,

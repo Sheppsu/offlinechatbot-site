@@ -71,10 +71,7 @@ def requires_channel(func):
         if channel is None:
             return error("invalid channel id")
 
-        if (
-            channel.user.id != req.user.id and
-            next((manager for manager in channel.managers if manager.id == req.user.id), None) is None
-        ):
+        if not channel.can_access_settings(req.user.id):
             return error("invalid permissions for this channel", status=403)
 
         return func(req, channel, *args, **kwargs)
