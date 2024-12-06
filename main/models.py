@@ -4,8 +4,10 @@ from common.twitch_api import get_token, get_user
 from common.models import enum_field
 from common.serializer import SerializableModel
 
+from enum import IntFlag
 
-class UserPermissions(models.TextChoices):
+
+class UserPermissions(IntFlag):
     MODERATOR = 1 << 0
     ADMIN = 1 << 1
 
