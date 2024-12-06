@@ -33,7 +33,8 @@ def index(req):
 def dashboard(req):
     osu = UserOsuConnection.objects.select_related("osu").filter(user_id=req.user.id).first()
     channel = UserChannel.objects.filter(user_id=req.user.id).first()
-    channel.user = req.user
+    if channel is not None:
+        channel.user = req.user
 
     return render(
         req,
