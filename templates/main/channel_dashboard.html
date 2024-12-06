@@ -12,6 +12,12 @@
     <h1>Settings</h1>
     <hr />
     <div class="setting">
+        <div id="is_enabled" class="setting-toggle" value="{{ channel.is_enabled }}">
+            <div class="setting-toggle-inner"></div>
+        </div>
+        <p>Enabled</p>
+    </div>
+    <div class="setting">
         <div id="is_offline_only" class="setting-toggle" value="{{ channel.is_offline_only }}">
             <div class="setting-toggle-inner"></div>
         </div>

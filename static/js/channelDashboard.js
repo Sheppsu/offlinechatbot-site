@@ -8,7 +8,7 @@ function updateSettingToggle(elm, value) {
     elm.children.item(0).setAttribute("class", "setting-toggle-inner "+cls);
 }
 
-let updateSettingTimeout = null;
+let updateSettingTimeout = {};
 let updateCommandTimeout = {};
 
 function initSetting(setting) {
@@ -19,12 +19,12 @@ function initSetting(setting) {
             const newValue = setting.classList.contains("off");
             updateSettingToggle(setting, newValue);
 
-            if (updateSettingTimeout !== null)
+            if (updateSettingTimeout[setting.id] !== undefined)
                 clearTimeout(updateSettingTimeout);
 
-            updateSettingTimeout = setTimeout(() => {
+            updateSettingTimeout[setting.id] = setTimeout(() => {
                 updateSetting(channel.id, setting.id, newValue);
-                updateSettingTimeout = null;
+                updateSettingTimeout[setting.id] = undefined;
             }, 1000);
         });
     else
