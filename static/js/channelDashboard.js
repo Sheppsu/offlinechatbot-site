@@ -14,7 +14,7 @@ let updateCommandTimeout = {};
 function initSetting(setting) {
     updateSettingToggle(setting, setting.getAttribute("value") === "True")
 
-    if (setting.classList.contains("channel-setting"))
+    if (!setting.id.startsWith("cmd"))
         setting.addEventListener("click", () => {
             const newValue = setting.classList.contains("off");
             updateSettingToggle(setting, newValue);
@@ -23,7 +23,7 @@ function initSetting(setting) {
                 clearTimeout(updateSettingTimeout);
 
             updateSettingTimeout = setTimeout(() => {
-                updateSetting(channel.id, setting.id, newValue)
+                updateSetting(channel.id, setting.id, newValue);
                 updateSettingTimeout = null;
             }, 1000);
         });
