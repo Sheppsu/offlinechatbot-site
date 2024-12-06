@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 
-from main.models import Command, UserChannel, ChannelCommand
+from main.models import Command, UserChannel, ChannelCommand, UserPermissions, User, UserChannelConnection
 
 import socket
 import json
@@ -153,5 +153,27 @@ def toggle_command(req, id, data):
     command.save()
 
     communicator.put(command.channel.id)
+
+    return success(None)
+
+
+def admin_add_connection(req):
+    if not req.user.is_authenticated:
+        return error("not logged in", status=403)
+
+    if UserPermissions.ADMIN not in req.user.permissions:
+        return error("invalid permissions", status=403)
+
+    try:
+        channel_user = User.objects.get(username=req.GET["channel"])
+        channel = UserChannel.objects.get(user_id=channel_user.id)
+        user = User.objects.get(username=req.GET["user"])
+    except Exception as exc:
+        return error(str(exc))
+
+    UserChannelConnection.objects.create(
+        user_id=user.id,
+        channel_id=channel.id
+    )
 
     return success(None)
