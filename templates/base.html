@@ -25,7 +25,7 @@
             </a>
             <div class="header-spacer"></div>
             {% if user.is_authenticated %}
-            <a class="header-link" href="{{ auth_url }}">
+            <a class="header-link" href="{% url 'dashboard' %}">
                 <div class="header-item">{{ user.username }}</div>
             </a>
             {% else %}
