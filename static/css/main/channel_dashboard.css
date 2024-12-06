@@ -69,3 +69,7 @@
     align-items: center;
     gap: 10px;
 }
+
+.command-description {
+    margin: 0;
+}
