@@ -1,6 +1,29 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Dashboard{% endblock title %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/main/dashboard.css' %}">
+{% endblock head %}
 {% block body %}
-
+<div class="content-container">
+    <h1>Connections</h1>
+    <hr/>
+    <div class="items-container">
+        <a class="connection osu" href="{{ osu_auth_url }}">
+            <div class="connection-icon osu"></div>
+            {% if connections.osu is not None %}
+            <p class="connection-label">{{ connections.osu.osu.username }}</p>
+            {% endif %}
+        </a>
+    </div>
+    <h1>Channels</h1>
+    <hr/>
+    <div class="items-container">
+        {% for channel in channels %}
+        <a class="channel" href="{% url 'channel_dashboard' channel.id %}">
+            <p class="channel-label">{{ channel.user.username }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</div>
 {% endblock body %}

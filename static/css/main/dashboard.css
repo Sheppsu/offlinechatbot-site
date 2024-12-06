@@ -1,0 +1,64 @@
+body {
+    align-items: center;
+}
+
+.content-container {
+    width: 100%;
+    max-width: 800px;
+}
+
+.items-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.connection {
+    height: 50px;
+    padding: 5px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+
+    border: solid white 2px;
+    border-radius: 5px;
+}
+
+.connection.osu {
+    background-color: #f062a1;
+}
+
+.connection-icon {
+    height: 100%;
+    aspect-ratio: 1/1;
+
+    background-size: contain;
+}
+
+.connection-icon.osu {
+    background-image: url("/static/images/osu-logo-text.svg");
+}
+
+.connection-label {
+    flex-grow: 1;
+    margin: 0 5px 0 0;
+    padding-top: 14px;
+
+    font-size: 18px;
+
+    text-align: center;
+}
+
+.channel {
+    height: 25px;
+    padding: 5px;
+
+    border: solid white 2px;
+    border-radius: 5px;
+}
+
+.channel-label {
+    margin: 0;
+
+    font-size: 20px;
+}

@@ -20,7 +20,7 @@ body {
     overflow: hidden;
 }
 
-h1, a, p {
+h1, a, p, div {
     font-family: Verdana, serif;
     color: var(--text-color);
 }
@@ -87,20 +87,6 @@ hr {
 
 .header-link:hover {
     color: white;
-}
-
-.content-container {
-    width: calc(100% - 26px);
-    max-width: 800px;
-
-    margin: 20px auto auto;
-    padding: 10px;
-
-    border: solid 3px white;
-    border-radius: 15px;
-
-    text-align: center;
-    background-color: var(--site-fg);
 }
 
 .description {

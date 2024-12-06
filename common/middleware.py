@@ -44,4 +44,5 @@ class ExceptionHandlingMiddleware:
         return self.get_response(*args, **kwargs)
 
     def process_exception(self, req, exc):
-        send_error_embed(req, exc)
+        if not settings.DEBUG:
+            send_error_embed(req, exc)

@@ -1,0 +1,47 @@
+:root {
+    --setting-off: #F8353A;
+    --setting-on: #24F571;
+}
+
+.setting {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.setting-toggle {
+    width: 50px;
+    height: 25px;
+
+    border: solid white 2px;
+    border-radius: 25px;
+}
+
+.setting-toggle:hover {
+    cursor: pointer;
+}
+
+.setting-toggle-inner {
+    width: 27px;
+    height: 27px;
+    margin-top: -1px;
+    margin-left: -1px;
+
+    background-color: white;
+    border-radius: 25px;
+
+    transition: margin 0.2s ease-out;
+}
+
+.setting-toggle-inner.off {
+    margin-left: 25px;
+}
+
+.setting-toggle.on {
+    background-color: var(--setting-on);
+}
+
+.setting-toggle.off {
+    background-color: var(--setting-off);
+}

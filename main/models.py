@@ -37,7 +37,7 @@ class UserManager(models.Manager):
         return self.create_user(code, UserPermissions.ADMIN)
 
 
-class User(models.Model):
+class User(SerializableModel):
     is_anonymous = False
     is_authenticated = True
 
@@ -59,13 +59,27 @@ class User(models.Model):
 
     objects = UserManager()
 
+    class Serialization:
+        FIELDS = ["id", "username", "permissions"]
+
     def __str__(self):
         return self.username
 
 
-class UserChannel(models.Model):
+class UserChannel(SerializableModel):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
     is_offline_only = models.BooleanField()
+
+    class Serialization:
+        FIELDS = ["id", "is_offline_only"]
+
+
+class UserChannelConnection(SerializableModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="managed_channels")
+    channel = models.ForeignKey(UserChannel, on_delete=models.CASCADE, related_name="managers")
+
+    class Serialization:
+        FIELDS = ["id"]
 
 
 class UserAfk(models.Model):
@@ -122,10 +136,10 @@ class Command(SerializableModel):
     args = models.JSONField(default=list)
 
     class Serialization:
-        FIELDS = ["name", "description", "aliases", "args"]
+        FIELDS = ["id", "name", "description", "aliases", "args"]
 
 
-class ChannelCommand(models.Model):
+class ChannelCommand(SerializableModel):
     channel = models.ForeignKey(UserChannel, on_delete=models.CASCADE, related_name="commands")
     command = models.ForeignKey(Command, on_delete=models.CASCADE)
     is_enabled = models.BooleanField()
@@ -134,3 +148,6 @@ class ChannelCommand(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["channel", "command"], name="channel_command_unique")
         ]
+
+    class Serialization:
+        FIELDS = ["id", "is_enabled"]

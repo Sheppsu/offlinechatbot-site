@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Home{% endblock title %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/main/index.css' %}">
+{% endblock head %}
 {% block body %}
 <div class="content-container">
     <h1>Website of sheppsubot</h1>

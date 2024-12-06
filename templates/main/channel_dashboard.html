@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Channel Dashboard - {{ channel.user.username }}{% endblock title %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/main/dashboard.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/main/channel_dashboard.css' %}">
+{{ channel|json_script:"channel-data" }}
+{% endblock head %}
+{% block body %}
+<div class="content-container">
+    <h1>Settings</h1>
+    <hr />
+    <div class="setting">
+        <div id="is_offline_only" class="setting-toggle" value="{{ channel.is_offline_only }}">
+            <div class="setting-toggle-inner"></div>
+        </div>
+        <p>Run in offline chat only</p>
+    </div>
+</div>
+<script type="module">
+    import { initSettings } from "/static/js/channelDashboard.js";
+    initSettings();
+</script>
+{% endblock body %}
