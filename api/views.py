@@ -42,7 +42,10 @@ class BotCommunicator:
 
         try:
             while True:
-                channel_id = self._queue.get()
+                try:
+                    channel_id = self._queue.get(timeout=1)
+                except queue.Empty:
+                    continue
 
                 if channel_id == 0:
                     break
