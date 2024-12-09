@@ -60,6 +60,7 @@ def channel_dashboard(req, id: int):
 
     serial_channel = channel.serialize(includes=["user", "commands__command"])
     serial_channel["commands"] = sorted(serial_channel["commands"], key=lambda c: c["command"]["name"])
+    serial_channel["managers_string"] = ", ".join((conn.user.username for conn in channel.managers.all()))
 
     return render(
         req,
