@@ -2,6 +2,7 @@ from django.conf import settings
 
 import requests
 import os
+import traceback
 
 
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
@@ -18,12 +19,13 @@ def header_embed():
 def send_error_embed(req, exc):
     embeds = [
         {
-            "title": f"{req.method} {req.path}",
-            "description": str(exc),
+            "description": block,
             "color": 0xff0000,
-        },
-        header_embed()
+        }
+        for block in traceback.format_exception(exc)[1:]
     ]
+    embeds[0]["title"] = f"{req.method} {req.path}"
+    embeds.append(header_embed())
 
     for name, value in req.headers.items():
         if len(embeds[-1]["fields"]) == 25:
