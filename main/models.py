@@ -59,6 +59,10 @@ class User(SerializableModel):
 
     objects = UserManager()
 
+    @property
+    def is_admin(self):
+        return UserPermissions.ADMIN in self.permissions
+
     class Serialization:
         FIELDS = ["id", "username", "permissions"]
 
@@ -71,11 +75,17 @@ class UserChannel(SerializableModel):
     is_offline_only = models.BooleanField(default=True)
     is_enabled = models.BooleanField(default=False)
 
-    def can_access_settings(self, user_id: int):
+    def can_access_settings(self, user: User):
         """Accesses 'managers' o2m field"""
+        if not user.is_authenticated:
+            return False
+
+        if user.is_admin:
+            return True
+
         return (
-            self.user_id == user_id or
-            next((manager for manager in self.managers.all() if manager.user_id == user_id), None) is not None
+            self.user_id == user.id or
+            next((manager for manager in self.managers.all() if manager.user_id == user.id), None) is not None
         )
 
     class Serialization:

@@ -55,7 +55,7 @@ def channel_dashboard(req, id: int):
     if channel is None:
         return redirect("dashboard")
 
-    if not channel.can_access_settings(req.user.id):
+    if not channel.can_access_settings(req.user):
         return HttpResponseForbidden()
 
     serial_channel = channel.serialize(includes=["user", "commands__command"])

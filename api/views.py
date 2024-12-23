@@ -77,7 +77,7 @@ def requires_channel(func):
         if channel is None:
             return error("invalid channel id")
 
-        if not channel.can_access_settings(req.user.id):
+        if not channel.can_access_settings(req.user):
             return error("invalid permissions for this channel", status=403)
 
         return func(req, channel, *args, **kwargs)
@@ -144,7 +144,7 @@ def toggle_command(req, id, data):
     if command is None:
         return error("invalid command")
 
-    if not command.channel.can_access_settings(req.user.id):
+    if not command.channel.can_access_settings(req.user):
         return error("invalid permissions for this channel", status=403)
 
     try:
