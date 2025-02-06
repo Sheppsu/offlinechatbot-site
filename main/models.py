@@ -63,6 +63,11 @@ class User(SerializableModel):
     def is_admin(self):
         return self.permissions is not None and UserPermissions.ADMIN in self.permissions
 
+    # for sesame
+    @property
+    def password(self):
+        return None
+
     class Serialization:
         FIELDS = ["id", "username", "permissions"]
 
