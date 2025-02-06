@@ -87,7 +87,7 @@ input[type=number] {
 
 #zoom-table {
     width: calc(100% - 40px);
-    height: 100%;
+    height: var(--zoom-bar-height);
 
     margin: 0 20px;
 }
