@@ -407,7 +407,7 @@ class Server:
             del self.connections[ws.id]
 
     async def run(self):
-        async with websockets.serve(self.handler, os.getenv("HOST"), os.getenv("PORT")):
+        async with websockets.serve(self.handler, os.getenv("SERVER_HOST"), os.getenv("SERVER_PORT")):
             _log.info("Server up!")
             await asyncio.Future()  # run forever
 
