@@ -27,10 +27,6 @@ input {
     padding: 0;
 }
 
-h1 {
-    margin: 0;
-}
-
 /* Disable number scroll in number input */
 
 /* Chrome, Safari, Edge, Opera */
@@ -108,6 +104,11 @@ input[type=number] {
 
 .black {
     color: #000000;
+}
+
+.label {
+    font-size: 150%;
+    margin: 0;
 }
 
 .picked-zoom-option {
