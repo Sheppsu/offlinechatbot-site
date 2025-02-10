@@ -10,7 +10,7 @@ import queue
 
 
 class BotCommunicator:
-    SERVER_PORT = int(os.getenv("SERVER_PORT"))
+    SERVER_PORT = int(os.getenv("BOT_SERVER_PORT"))
 
     def __init__(self):
         self._queue: queue.Queue = queue.Queue()
