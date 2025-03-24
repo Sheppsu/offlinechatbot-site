@@ -19,6 +19,11 @@
     <h1>Channels</h1>
     <hr/>
     <div class="items-container">
+        {% if user_channel is None %}
+        <div id="add-channel" class="channel">
+            <p class="channel-label">+</p>
+        </div>
+        {% endif %}
         {% for channel in channels %}
         <a class="channel" href="{% url 'channel_dashboard' channel.id %}">
             <p class="channel-label">{{ channel.user.username }}</p>
@@ -26,4 +31,24 @@
         {% endfor %}
     </div>
 </div>
+<script type="module">
+    import { createChannel } from "/static/js/api.js";
+
+    function onAddChannelClicked() {
+        addChannelElm.classList.add("loading");
+
+        createChannel().then((resp) => {
+            if (resp !== undefined) {
+                window.location.assign(`/dashboard/channels/${resp.id}/`);
+            }
+
+            addChannelElm.classList.remove("loading");
+        });
+    }
+
+    const addChannelElm = document.getElementById("add-channel");
+    if (addChannelElm !== null) {
+        addChannelElm.addEventListener("click", onAddChannelClicked);
+    }
+</script>
 {% endblock body %}

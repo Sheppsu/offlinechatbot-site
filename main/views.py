@@ -43,6 +43,7 @@ def dashboard(req):
         'main/dashboard.html',
         {
             "connections": {"osu": osu},
+            "user_channel": channel,
             "channels": ([channel] if channel is not None else []) + list((conn.channel for conn in connections)),
             "osu_auth_url": settings.OSU_AUTH_URL
         }

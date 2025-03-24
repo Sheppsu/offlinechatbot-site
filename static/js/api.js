@@ -52,3 +52,14 @@ export async function toggleCommand(cmdId, enable) {
         )
     )
 }
+
+export async function createChannel() {
+    return await handleResp(
+        await fetch(
+            "/api/channels/create", {
+                method: "POST",
+                headers: authHeader()
+            }
+        )
+    )
+}

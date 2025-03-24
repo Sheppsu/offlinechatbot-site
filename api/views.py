@@ -110,6 +110,16 @@ def requires_data(func):
     return wrapper
 
 
+def requires_user(func):
+    def wrapper(req, *args, **kwargs):
+        if not req.user.is_authenticated:
+            return error("not logged in", status=403)
+
+        return func(req, *args, **kwargs)
+
+    return wrapper
+
+
 def get_commands(req):
     return success([cmd.serialize() for cmd in Command.objects.all()])
 
@@ -160,10 +170,22 @@ def toggle_command(req, id, data):
     return success(None)
 
 
-def admin_add_connection(req):
-    if not req.user.is_authenticated:
-        return error("not logged in", status=403)
+@requires_user
+@requires_method("POST")
+def create_channel(req):
+    channel = UserChannel.objects.filter(user_id=req.user.id).first()
+    if channel is not None:
+        return error("channel already exists")
 
+    channel = UserChannel.objects.create(user=req.user)
+
+    communicator.put(channel.id)
+
+    return success(channel.serialize(includes=["user"]))
+
+
+@requires_user
+def admin_add_connection(req):
     if UserPermissions.ADMIN not in req.user.permissions:
         return error("invalid permissions", status=403)
 
