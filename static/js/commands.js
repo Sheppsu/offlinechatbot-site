@@ -66,6 +66,24 @@ function createCommand(cmd) {
     return container;
 }
 
+function navigateToHash() {
+    const hash = window.location.hash;
+    if (!hash) return;
+
+    const observer = new MutationObserver(() => {
+        const target = document.querySelector(hash);
+        if (target) {
+            target.scrollIntoView({ behavior: "smooth" });
+            observer.disconnect();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    }) ;
+}
+
 export function createPage() {
     getCommands().then((cmds) => {
         for (const cmd of cmds.sort((a, b) => a.name.localeCompare(b.name))) {
@@ -73,4 +91,6 @@ export function createPage() {
             cmdContainer.append(createCommand(cmd));
         }
     });
+
+    navigateToHash();
 }
